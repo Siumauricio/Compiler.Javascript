@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Compiler.AbstractSyntaxTreee\Compiler.AbstractSyntaxTreee.csproj" />
+    <ProjectReference Include="..\Compiler.Lexer\Compiler.Lexer.csproj" />
+  </ItemGroup>
+
+</Project>
