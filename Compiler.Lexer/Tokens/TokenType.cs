@@ -9,6 +9,7 @@ namespace Compiler.Lexer.Tokens
         Asterisk,
         Plus,
         Minus,
+        Percentaje,
         LeftParens,
         RightParens,
         SemiColon,
@@ -35,6 +36,21 @@ namespace Compiler.Lexer.Tokens
         Comma,
         BasicType,
         FloatKeyword,
-        StringKeyword
+        StringKeyword,
+        BoolKeyword,
+        DateTimeKeyword,
+        ClassKeyword,
+        Ampersand,
+        VerticalLine,
+        AndOperator,
+        OrOperator,
+        Increment,
+        Decrement,
+        ForKeyword,
+        ForeachKeyword,
+        WhileKeyword,
+        WriteLineKeyword,
+        ReadLineKeyword
+
     }
 }

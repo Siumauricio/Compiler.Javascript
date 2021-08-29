@@ -10,6 +10,8 @@ namespace Compiler.Lexer
         private Input input;
         private readonly Dictionary<string, TokenType> keywords;
         private readonly Dictionary<string, TokenType> Tokens;
+        private readonly Dictionary<string, TokenType> Rep;
+
         public Scanner(Input input)
         {
             this.input = input;
@@ -19,7 +21,15 @@ namespace Compiler.Lexer
                 { "else", TokenType.ElseKeyword },
                 { "int", TokenType.IntKeyword },
                 { "float", TokenType.FloatKeyword },
+                { "bool", TokenType.BoolKeyword },
+                { "datetime", TokenType.DateTimeKeyword },
+                { "for", TokenType.ForKeyword },
+                { "foreach", TokenType.ForeachKeyword },
+                { "while", TokenType.WhileKeyword },
+                { "Console.WriteLine" ,TokenType.WriteLineKeyword},
+                { "Console.ReadLine" ,TokenType.ReadLineKeyword}
             };
+
             this.Tokens = new Dictionary<string, TokenType>
             {
                 { "+", TokenType.Plus },
@@ -32,6 +42,8 @@ namespace Compiler.Lexer
                 { "{", TokenType.OpenBrace },
                 { "}", TokenType.CloseBrace },
                 { ",", TokenType.Comma },
+                { "/", TokenType.Division },
+                { "%", TokenType.Percentaje },
                 { "\0", TokenType.EOF},
                 { ">", TokenType.GreaterThan },
                 { "<", TokenType.LessThan },
@@ -39,8 +51,22 @@ namespace Compiler.Lexer
                 { ">=", TokenType.GreaterOrEqualThan },
                 { "<=", TokenType.LessOrEqualThan },
                 { "!=", TokenType.DifferentThan },
+                { "==", TokenType.Equal },
+                { "&", TokenType.Ampersand },
+                { "|", TokenType.VerticalLine },
+                { "&&", TokenType.AndOperator },
+                { "||", TokenType.OrOperator },
+                { "++", TokenType.Increment },
+                { "--", TokenType.Decrement },
             };
-
+            this.Rep = new Dictionary<string, TokenType>
+            {
+                { "+", TokenType.Plus },
+                { "-", TokenType.Minus },
+                { "&", TokenType.Ampersand },
+                { "|", TokenType.VerticalLine },
+                { "=", TokenType.Assignation },
+            };
         }
 
         public Token GetNextToken()
@@ -57,7 +83,7 @@ namespace Compiler.Lexer
                 {
                     lexeme.Append(currentChar);
                     currentChar = PeekNextChar();
-                    while (char.IsLetterOrDigit(currentChar))
+                    while (char.IsLetterOrDigit(currentChar) || currentChar == '.')
                     {
                         currentChar = GetNextChar();
                         lexeme.Append(currentChar);
@@ -68,7 +94,6 @@ namespace Compiler.Lexer
                     {
                         return GetInfo(this.keywords[lexeme.ToString()], input.Position.Column, input.Position.Line, lexeme.ToString());
                     }
-
                     return GetInfo(TokenType.Identifier, input.Position.Column, input.Position.Line, lexeme.ToString());
                 }
                 else if (char.IsDigit(currentChar))
@@ -104,15 +129,18 @@ namespace Compiler.Lexer
                     {
                         lexeme.Append(currentChar);
                         var nextChar = PeekNextChar();
-                        if (nextChar != '=')
+                        if (!this.Rep.ContainsKey(nextChar.ToString()))
                         {
-                            return GetInfo(this.Tokens[currentChar.ToString()], input.Position.Column, input.Position.Line, lexeme.ToString().Trim());
+                                return GetInfo(this.Tokens[currentChar.ToString()], input.Position.Column, input.Position.Line, lexeme.ToString().Trim());
                         }
                         else
                         {
                             lexeme.Append(nextChar);
                             GetNextChar();
-                            return GetInfo(this.Tokens[lexeme.ToString().Trim()], input.Position.Column, input.Position.Line, lexeme.ToString().Trim());
+                            if (this.Tokens.ContainsKey(lexeme.ToString()))
+                            {
+                                return GetInfo(this.Tokens[lexeme.ToString().Trim()], input.Position.Column, input.Position.Line, lexeme.ToString().Trim());
+                            }
                         }
                     }
                     throw new ApplicationException($"Caracter {lexeme} invalido en la columna: {input.Position.Column}, fila: {input.Position.Line}");
@@ -135,7 +163,6 @@ namespace Compiler.Lexer
             input = next.Reminder;
             return next.Value;
         }
-
         private char PeekNextChar()
         {
             var next = input.NextChar();
