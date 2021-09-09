@@ -1,4 +1,5 @@
-﻿using Compiler.Lexer.Tokens;
+﻿using Compiler.Core;
+using Compiler.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -27,7 +28,12 @@ namespace Compiler.Lexer
                 { "foreach", TokenType.ForeachKeyword },
                 { "while", TokenType.WhileKeyword },
                 { "Console.WriteLine" ,TokenType.WriteLineKeyword},
-                { "Console.ReadLine" ,TokenType.ReadLineKeyword}
+                { "Console.ReadLine" ,TokenType.ReadLineKeyword},
+                { "namespace" ,TokenType.NamespaceKeyword},
+                { "main" ,TokenType.MainKeyword},
+                { "void" ,TokenType.VoidKeyword},
+                { "static" ,TokenType.StaticKeyword},
+                { "string" ,TokenType.StringKeyword},
             };
 
             this.Tokens = new Dictionary<string, TokenType>
@@ -58,6 +64,8 @@ namespace Compiler.Lexer
                 { "||", TokenType.OrOperator },
                 { "++", TokenType.Increment },
                 { "--", TokenType.Decrement },
+               { "[", TokenType.LeftBracket },
+               { "]", TokenType.RightBracket },
             };
             this.Rep = new Dictionary<string, TokenType>
             {
@@ -131,7 +139,7 @@ namespace Compiler.Lexer
                         var nextChar = PeekNextChar();
                         if (!this.Rep.ContainsKey(nextChar.ToString()))
                         {
-                                return GetInfo(this.Tokens[currentChar.ToString()], input.Position.Column, input.Position.Line, lexeme.ToString().Trim());
+                            return GetInfo(this.Tokens[currentChar.ToString()], input.Position.Column, input.Position.Line, lexeme.ToString().Trim());
                         }
                         else
                         {

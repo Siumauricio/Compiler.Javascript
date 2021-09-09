@@ -1,5 +1,5 @@
-﻿using Compiler.Lexer;
-using Compiler.Lexer.Tokens;
+﻿using Compiler.Core;
+using Compiler.Lexer;
 using System;
 using System.IO;
 
@@ -12,7 +12,6 @@ namespace Compiler.Console
             var code = File.ReadAllText("Code.txt").Replace(Environment.NewLine, "\n");
             var input = new Input(code);
             var scanner = new Scanner(input);
-           
             while (true)
             {
                 var token = scanner.GetNextToken();
@@ -20,13 +19,15 @@ namespace Compiler.Console
 
                 if (token.Lexeme == "\0")
                 {
-                    System.Console.WriteLine("TODOS LOS TOKENS INGRESADOS SON VALIDOS");
+                    System.Console.WriteLine("TODOS LOS TOKENS INGRESADOS SON VALIDOzsssS1");
                     break;
                 }
             }
+            //var scanner = new Scanner(input);
             //var parser = new Parser.Parser(scanner);
-            //var ast = parser.Parse();
-            //System.Console.WriteLine("Success!{code}");
+            //var engine = new CompilerEngine(parser);
+            //engine.Run();
         }
-    }
+
+   }
 }

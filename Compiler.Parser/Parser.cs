@@ -1,13 +1,13 @@
-﻿using Compiler.AbstractSyntaxTreee;
-using Compiler.AbstractSyntaxTreee.Expressions;
-using Compiler.AbstractSyntaxTreee.Statements;
-using Compiler.Lexer;
-using Compiler.Lexer.Tokens;
+﻿using Compiler.Core;
+using Compiler.Core.Expressions;
+using Compiler.Core.Interfaces;
+using Compiler.Core.Statements;
 using System;
+using Type = Compiler.Core.Type;
 
 namespace Compiler.Parser
 {
-    public class Parser
+    public class Parser : IParser
     {
         private readonly IScanner scanner;
         private Token lookAhead;
@@ -19,13 +19,30 @@ namespace Compiler.Parser
             this.Move();
         }
 
-        public Node Parse()
+        public Statement Parse()
         {
             return Program();
         }
 
         private Statement Program()
         {
+            top = new Environment(top);
+            top.AddMethod("print", new Id(new Token
+            {
+                Lexeme = "print"
+            }, Type.Void),
+            new ArgumentExpression(new Token
+            {
+                Lexeme = ","
+            },
+            new Id(new Token
+            {
+                Lexeme = "arg1"
+            }, Type.String),
+            new Id(new Token
+            {
+                Lexeme = "arg2"
+            }, Type.String)));
             return Block();
         }
 
@@ -45,7 +62,7 @@ namespace Compiler.Parser
         {
             if (this.lookAhead.TokenType == TokenType.CloseBrace)
             {//{}
-                return Statement.Null;
+                return null;
             }
             return new SequenceStatement(Stmt(), Stmts());
         }
@@ -58,13 +75,13 @@ namespace Compiler.Parser
             {
                 case TokenType.Identifier:
                     {
-                        var id = top.Get(this.lookAhead.Lexeme);
+                        var symbol = top.Get(this.lookAhead.Lexeme);
                         Match(TokenType.Identifier);
                         if (this.lookAhead.TokenType == TokenType.Assignation)
                         {
-                            return AssignStmt(id);
+                            return AssignStmt(symbol.Id);
                         }
-                        return CallStmt(id);
+                        return CallStmt(symbol);
                     }
                 case TokenType.IfKeyword:
                     {
@@ -75,11 +92,11 @@ namespace Compiler.Parser
                         statement1 = Stmt();
                         if (this.lookAhead.TokenType != TokenType.ElseKeyword)
                         {
-                            return new IfStatement(expression, statement1);
+                            return new IfStatement(expression as TypedExpression, statement1);
                         }
                         Match(TokenType.ElseKeyword);
                         statement2 = Stmt();
-                        return new ElseStatement(expression, statement1, statement2);
+                        return new ElseStatement(expression as TypedExpression, statement1, statement2);
                     }
                 default:
                     return Block();
@@ -93,7 +110,7 @@ namespace Compiler.Parser
             {
                 var token = lookAhead;
                 Move();
-                expression = new RelationalExpression(token, expression, Rel());
+                expression = new RelationalExpression(token, expression as TypedExpression, Rel() as TypedExpression);
             }
 
             return expression;
@@ -109,7 +126,7 @@ namespace Compiler.Parser
             {
                 var token = lookAhead;
                 Move();
-                expression = new RelationalExpression(token, expression, Expr());
+                expression = new RelationalExpression(token, expression as TypedExpression, Expr() as TypedExpression);
             }
             return expression;
         }
@@ -121,7 +138,7 @@ namespace Compiler.Parser
             {
                 var token = lookAhead;
                 Move();
-                expression = new ArithmeticOperator(token, expression, Term());
+                expression = new ArithmeticOperator(token, expression as TypedExpression, Term() as TypedExpression);
             }
             return expression;
         }
@@ -133,7 +150,7 @@ namespace Compiler.Parser
             {
                 var token = lookAhead;
                 Move();
-                expression = new ArithmeticOperator(token, expression, Factor());
+                expression = new ArithmeticOperator(token, expression as TypedExpression, Factor() as TypedExpression);
             }
             return expression;
         }
@@ -150,31 +167,31 @@ namespace Compiler.Parser
                         return expression;
                     }
                 case TokenType.IntConstant:
-                    var constant = new Constant(lookAhead, AbstractSyntaxTreee.Type.Int);
+                    var constant = new Constant(lookAhead, Type.Int);
                     Match(TokenType.IntConstant);
                     return constant;
                 case TokenType.FloatConstant:
-                    constant = new Constant(lookAhead, AbstractSyntaxTreee.Type.Float);
+                    constant = new Constant(lookAhead, Type.Float);
                     Match(TokenType.FloatConstant);
                     return constant;
                 case TokenType.StringConstant:
-                    constant = new Constant(lookAhead, AbstractSyntaxTreee.Type.String);
+                    constant = new Constant(lookAhead, Type.String);
                     Match(TokenType.StringConstant);
                     return constant;
                 default:
-                    var id = top.Get(this.lookAhead.Lexeme);
+                    var symbol = top.Get(this.lookAhead.Lexeme);
                     Match(TokenType.Identifier);
-                    return id;
+                    return symbol.Id;
             }
         }
 
-        private Statement CallStmt(Id id)
+        private Statement CallStmt(Symbol symbol)
         {
             Match(TokenType.LeftParens);
             var @params = OptParams();
             Match(TokenType.RightParens);
             Match(TokenType.SemiColon);
-            return new CallStatement(id, @params);
+            return new CallStatement(symbol.Id, @params, symbol.Attributes);
         }
 
         private Expression OptParams()
@@ -194,7 +211,7 @@ namespace Compiler.Parser
                 return expression;
             }
             Match(TokenType.Comma);
-            expression = new ArgumentExpression(lookAhead, expression, Params());
+            expression = new ArgumentExpression(lookAhead, expression as TypedExpression, Params() as TypedExpression);
             return expression;
         }
 
@@ -203,7 +220,7 @@ namespace Compiler.Parser
             Match(TokenType.Assignation);
             var expression = Eq();
             Match(TokenType.SemiColon);
-            return new AssignationStatement(id, expression);
+            return new AssignationStatement(id, expression as TypedExpression);
         }
 
         private void Decls()
@@ -226,24 +243,24 @@ namespace Compiler.Parser
                     var token = lookAhead;
                     Match(TokenType.Identifier);
                     Match(TokenType.SemiColon);
-                    var id = new Id(token, AbstractSyntaxTreee.Type.Float);
-                    top.Add(token.Lexeme, id);
+                    var id = new Id(token, Type.Float);
+                    top.AddVariable(token.Lexeme, id);
                     break;
                 case TokenType.StringKeyword:
                     Match(TokenType.StringKeyword);
                     token = lookAhead;
                     Match(TokenType.Identifier);
                     Match(TokenType.SemiColon);
-                    id = new Id(token, AbstractSyntaxTreee.Type.String);
-                    top.Add(token.Lexeme, id);
+                    id = new Id(token, Type.String);
+                    top.AddVariable(token.Lexeme, id);
                     break;
                 default:
                     Match(TokenType.IntKeyword);
                     token = lookAhead;
                     Match(TokenType.Identifier);
                     Match(TokenType.SemiColon);
-                    id = new Id(token, AbstractSyntaxTreee.Type.Int);
-                    top.Add(token.Lexeme, id);
+                    id = new Id(token, Type.Int);
+                    top.AddVariable(token.Lexeme, id);
                     break;
             }
         }

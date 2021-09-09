@@ -1,10 +1,9 @@
-﻿using Compiler.Lexer.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Compiler.AbstractSyntaxTreee
+namespace Compiler.Core
 {
     public class Type : IEquatable<Type>
     {
@@ -21,6 +20,8 @@ namespace Compiler.AbstractSyntaxTreee
         public static Type Float => new Type("float", TokenType.BasicType);
         public static Type Bool => new Type("bool", TokenType.BasicType);
         public static Type String => new Type("string", TokenType.BasicType);
+        public static Type Void => new Type("void", TokenType.BasicType);
+
 
         public bool Equals(Type other)
         {

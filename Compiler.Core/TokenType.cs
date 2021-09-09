@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Compiler.Lexer.Tokens
+namespace Compiler.Core
 {
     public enum TokenType
     {
@@ -50,7 +50,12 @@ namespace Compiler.Lexer.Tokens
         ForeachKeyword,
         WhileKeyword,
         WriteLineKeyword,
-        ReadLineKeyword
-
+        ReadLineKeyword,
+        NamespaceKeyword,
+        StaticKeyword,
+        VoidKeyword,
+        MainKeyword,
+        LeftBracket,
+        RightBracket
     }
 }
