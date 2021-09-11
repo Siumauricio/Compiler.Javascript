@@ -1,14 +1,16 @@
-﻿
-
+﻿using System;
+using Compiler.Core;
+namespace std.s
 {
+    class TestClass
+    {
 
-int x=10;
-float d;
-datetime b;
-bool a;
-
-while(x)
-  x=9;
-
-
+      static void Main(string[] args)
+        {
+            bool x=false;
+     
+     
+        }
+    }
 }
+

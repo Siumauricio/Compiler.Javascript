@@ -27,35 +27,49 @@ namespace Compiler.Parser
         private Statement Program()
         {
             top = new Environment(top);
-            top.AddMethod("print", new Id(new Token
-            {
-                Lexeme = "print"
-            }, Type.Void),
-            new ArgumentExpression(new Token
-            {
-                Lexeme = ","
-            },
-            new Id(new Token
-            {
-                Lexeme = "arg1"
-            }, Type.String),
-            new Id(new Token
-            {
-                Lexeme = "arg2"
-            }, Type.String)));
+            //top.AddMethod("print", new Id(new Token { Lexeme = "print" }, Type.Void), new ArgumentExpression(new Token { Lexeme = "," }, new Id(new Token { Lexeme = "arg1" }, Type.String), new Id(new Token { Lexeme = "arg2" }, Type.String)));
             return Block();
         }
 
         private Statement Block()
         {
-            Match(TokenType.OpenBrace);
+            DeclsUsing();
+            NamespaceStmt();
+            MaintStmt();
+
             var previousSavedEnvironment = top;
             top = new Environment(top);
             Decls();
-            var statements = Stmts();
+            //var statements = Stmts();
             Match(TokenType.CloseBrace);
-            top = previousSavedEnvironment;
-            return statements;
+            Match(TokenType.CloseBrace);
+            Match(TokenType.CloseBrace);
+            //top = previousSavedEnvironment;
+            //return statements;
+            return null;
+        }
+        private void NamespaceStmt()
+        {
+            Match(TokenType.NamespaceKeyword);
+            Match(TokenType.Identifier);
+            Match(TokenType.OpenBrace);
+
+            Match(TokenType.ClassKeyword);
+            Match(TokenType.Identifier);
+            Match(TokenType.OpenBrace);
+        }
+        private void MaintStmt()
+        {
+            Match(TokenType.StaticKeyword);
+            Match(TokenType.VoidKeyword);
+            Match(TokenType.MainKeyword);
+            Match(TokenType.LeftParens);
+            Match(TokenType.StringKeyword);
+            Match(TokenType.LeftBracket);
+            Match(TokenType.RightBracket);
+            Match(TokenType.Identifier);
+            Match(TokenType.RightParens);
+            Match(TokenType.OpenBrace);
         }
 
         private Statement Stmts()
@@ -241,7 +255,6 @@ namespace Compiler.Parser
         }
 
 
-
         private void Decls()
         {
             if (this.lookAhead.TokenType == TokenType.IntKeyword ||
@@ -252,6 +265,15 @@ namespace Compiler.Parser
             {
                 Decl();
                 Decls();
+            }
+        }
+
+        private void DeclsUsing()
+        {
+            if (this.lookAhead.TokenType == TokenType.UsingKeyword)
+            {
+                DeclUsing();
+                DeclsUsing();
             }
         }
 
@@ -341,14 +363,21 @@ namespace Compiler.Parser
             }
         }
 
-        /*
-          private Statement AssignStmt(Id id)
+        private void DeclUsing()
         {
-            Match(TokenType.Assignation);
-            var expression = Eq();
-            Match(TokenType.SemiColon);
-            return new AssignationStatement(id, expression as TypedExpression);
-        }*/
+            switch (this.lookAhead.TokenType)
+            {
+                case TokenType.UsingKeyword:
+                    Match(TokenType.UsingKeyword);
+                    var token = lookAhead;
+                    Match(TokenType.Identifier);
+                    Match(TokenType.SemiColon);
+                    var id = new Id(token, Type.Void);
+                    top.AddLibrary(token.Lexeme, id);
+                    break;
+            }
+        }
+
 
         private void Move()
         {

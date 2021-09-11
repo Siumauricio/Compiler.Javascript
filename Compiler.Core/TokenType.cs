@@ -57,6 +57,11 @@ namespace Compiler.Core
         VoidKeyword,
         MainKeyword,
         LeftBracket,
-        RightBracket
+        RightBracket,
+        UsingKeyword,
+        FalseKeyword,
+        TrueKeyword
+        
+        
     }
 }
