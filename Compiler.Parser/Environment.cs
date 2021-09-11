@@ -51,6 +51,14 @@ namespace Compiler.Parser
             }
         }
 
+        public void AddVariableWithValue(string lexeme, Id id, dynamic value)
+        {
+            if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Variable, id, value)))
+            {
+                throw new ApplicationException($"Variable {lexeme} already defined in current context");
+            }
+        }
+
         public void UpdateVariable(string lexeme, dynamic value)
         {
             var variable = Get(lexeme);

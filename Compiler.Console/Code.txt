@@ -1,12 +1,14 @@
 ﻿
-using System;
-  
-class GFG {
-     
-    static public void Main(string[] args)
-    {
-    int a;
-  
-        Console.WriteLine(a);
-    }
+
+{
+
+int x=10;
+float d;
+datetime b;
+bool a;
+
+while(x)
+  x=9;
+
+
 }

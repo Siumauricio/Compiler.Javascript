@@ -151,6 +151,7 @@ namespace Compiler.Lexer
                             }
                         }
                     }
+
                     throw new ApplicationException($"Caracter {lexeme} invalido en la columna: {input.Position.Column}, fila: {input.Position.Line}");
                 }
             }
