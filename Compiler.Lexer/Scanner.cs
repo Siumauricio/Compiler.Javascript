@@ -36,14 +36,9 @@ namespace Compiler.Lexer
                 { "string" ,TokenType.StringKeyword},
                 {"using" ,TokenType.UsingKeyword},
                 {"class",TokenType.ClassKeyword },
-<<<<<<< Updated upstream
-                {"false",TokenType.FalseKeyword },
-                {"true",TokenType.TrueKeyword },
-=======
                 {"false",TokenType.FalseConstant },
                 {"true",TokenType.TrueConstant },
                 {"public",TokenType.PublicKeyword }
->>>>>>> Stashed changes
             };
 
             this.Tokens = new Dictionary<string, TokenType>

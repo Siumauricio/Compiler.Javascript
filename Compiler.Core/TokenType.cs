@@ -58,14 +58,9 @@ namespace Compiler.Core
         LeftBracket,
         RightBracket,
         UsingKeyword,
-<<<<<<< Updated upstream
-        FalseKeyword,
-        TrueKeyword
-=======
         FalseConstant,
         TrueConstant,
         PublicKeyword
->>>>>>> Stashed changes
         
         
     }
