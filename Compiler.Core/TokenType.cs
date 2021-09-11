@@ -59,8 +59,8 @@ namespace Compiler.Core
         LeftBracket,
         RightBracket,
         UsingKeyword,
-        FalseKeyword,
-        TrueKeyword
+        FalseConstant,
+        TrueConstant
         
         
     }

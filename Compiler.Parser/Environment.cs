@@ -57,14 +57,6 @@ namespace Compiler.Parser
                 throw new ApplicationException($"Variable {lexeme} already defined in current context");
             }
         }
-        public void AddVariableWithValue(string lexeme, Id id,dynamic value)
-        {
-            if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Variable, id, value)))
-            {
-                throw new ApplicationException($"Variable {lexeme} already defined in current context");
-            }
-        }
-
         public void AddLibrary(string lexeme, Id id)
         {
             if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Library, id, null)))

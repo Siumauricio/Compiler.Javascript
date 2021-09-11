@@ -36,8 +36,8 @@ namespace Compiler.Lexer
                 { "string" ,TokenType.StringKeyword},
                 {"using" ,TokenType.UsingKeyword},
                 {"class",TokenType.ClassKeyword },
-                {"false",TokenType.FalseKeyword },
-                {"true",TokenType.TrueKeyword },
+                {"false",TokenType.FalseConstant },
+                {"true",TokenType.TrueConstant },
             };
 
             this.Tokens = new Dictionary<string, TokenType>
