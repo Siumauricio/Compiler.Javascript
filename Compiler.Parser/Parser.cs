@@ -40,13 +40,13 @@ namespace Compiler.Parser
             var previousSavedEnvironment = top;
             top = new Environment(top);
             Decls();
-            //var statements = Stmts();
+            var statements = Stmts();
             Match(TokenType.CloseBrace);
             Match(TokenType.CloseBrace);
             Match(TokenType.CloseBrace);
-            //top = previousSavedEnvironment;
-            //return statements;
-            return null;
+            top = previousSavedEnvironment;
+            return statements;
+           // return null;
         }
         private void NamespaceStmt()
         {
@@ -85,6 +85,7 @@ namespace Compiler.Parser
         {
             Expression expression;
             Statement statement1, statement2;
+
             switch (this.lookAhead.TokenType)
             {
                 case TokenType.Identifier:
@@ -112,19 +113,66 @@ namespace Compiler.Parser
                         statement2 = Stmt();
                         return new ElseStatement(expression as TypedExpression, statement1, statement2);
                     }
-                case TokenType.WhileKeyword: 
+                case TokenType.WhileKeyword:
                     {
                         Match(TokenType.WhileKeyword);
                         Match(TokenType.LeftParens);
                         expression = Eq();
                         Match(TokenType.RightParens);
+                        var isBrace = lookAhead;
+                        if (isBrace.TokenType == TokenType.OpenBrace) {
+                            Match(TokenType.OpenBrace);
+                            statement1 = Stmt();
+                            Match(TokenType.CloseBrace);
+                            return new WhileStatement(expression as TypedExpression, statement1);
+                        }
                         statement1 = Stmt();
                         return new WhileStatement(expression as TypedExpression, statement1);
+                    }
+
+                case TokenType.ForKeyword:
+                    {
+                        Match(TokenType.ForKeyword);
+                        Match(TokenType.LeftParens);//verificar
+                        Decl();
+                        expression = Eq();
+                        Match(TokenType.SemiColon);
+                        var variable = lookAhead;
+                        if (variable.TokenType == TokenType.Increment || variable.TokenType == TokenType.Decrement)
+                        {
+                            Match(variable.TokenType);
+                            Match(TokenType.Identifier);
+                            Match(TokenType.RightParens);
+                        }
+                        else if (variable.TokenType == TokenType.Identifier) {
+                            Match(variable.TokenType);
+                            variable = lookAhead;
+                            if (variable.TokenType == TokenType.Increment || variable.TokenType == TokenType.Decrement) {
+                                Match(variable.TokenType);
+                                Match(TokenType.RightParens);
+                            }
+                        }
+                            var isBrace = lookAhead;
+                            if (isBrace.TokenType == TokenType.OpenBrace) {
+                                Match(TokenType.OpenBrace);
+                                statement1 = Stmt();
+                                Match(TokenType.CloseBrace);
+                                return new ForStatement(expression as TypedExpression, statement1);
+                            }
+                        statement1 = Stmt();
+                        return new ForStatement(expression as TypedExpression, statement1);
                     }
                 default:
                     return Block();
             }
         }
+
+        private void Increment() { 
+            
+        
+        }
+
+
 
         private Expression Eq()
         {
@@ -201,9 +249,13 @@ namespace Compiler.Parser
                     constant = new Constant(lookAhead, Type.String);
                     Match(TokenType.StringConstant);
                     return constant;
-                case TokenType.BoolConstant:
+                case TokenType.TrueConstant:
                     constant = new Constant(lookAhead, Type.Bool);
-                    Match(TokenType.BoolConstant);
+                    Match(TokenType.TrueConstant);
+                    return constant;
+                case TokenType.FalseConstant:
+                    constant = new Constant(lookAhead, Type.Bool);
+                    Match(TokenType.FalseConstant);
                     return constant;
                 case TokenType.DateTimeConstant:
                     constant = new Constant(lookAhead, Type.DateTime);

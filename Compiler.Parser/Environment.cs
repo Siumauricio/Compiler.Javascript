@@ -80,6 +80,21 @@ namespace Compiler.Parser
             _table[lexeme] = variable;
         }
 
+        public void IncrementVariable(string lexeme, dynamic value)/////////////probemos
+        {
+            var variable = Get(lexeme);
+            variable.Value += value;
+            _table[lexeme] = variable;
+        }
+
+        public void Decrement(string lexeme, dynamic value)//////////////////probemos
+        {
+            var variable = Get(lexeme);
+            variable.Value -= value;
+            _table[lexeme] = variable;
+        }
+
+
         public void AddMethod(string lexeme, Id id, BinaryOperator arguments)
         {
             if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Method, id, arguments)))
