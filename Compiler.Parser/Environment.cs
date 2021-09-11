@@ -7,7 +7,8 @@ namespace Compiler.Parser
     public enum SymbolType
     {
         Variable,
-        Method
+        Method,
+        Library
     }
 
     public class Symbol
@@ -25,6 +26,12 @@ namespace Compiler.Parser
             SymbolType = symbolType;
             Id = id;
         }
+        //public Symbol(SymbolType symbolType, LibraryOpe id, Expression attributes)
+        //{
+        //    Attributes = attributes;
+        //    SymbolType = symbolType;
+        //    Id = id;
+        //}
 
         public SymbolType SymbolType { get; }
         public Id Id { get; }
@@ -48,6 +55,21 @@ namespace Compiler.Parser
             if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Variable, id, null)))
             {
                 throw new ApplicationException($"Variable {lexeme} already defined in current context");
+            }
+        }
+        public void AddVariableWithValue(string lexeme, Id id,dynamic value)
+        {
+            if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Variable, id, value)))
+            {
+                throw new ApplicationException($"Variable {lexeme} already defined in current context");
+            }
+        }
+
+        public void AddLibrary(string lexeme, Id id)
+        {
+            if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Library, id, null)))
+            {
+                throw new ApplicationException($"Library {lexeme} already defined in current context");
             }
         }
 

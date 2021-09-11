@@ -1,12 +1,16 @@
-﻿
-using System;
-  
-class GFG {
-     
-    static public void Main(string[] args)
+﻿using System;
+using Compiler.Core;
+namespace std.s
+{
+    class TestClass
     {
-    int a;
-  
-        Console.WriteLine(a);
+
+      static void Main(string[] args)
+        {
+            bool x=false;
+     
+     
+        }
     }
 }
+

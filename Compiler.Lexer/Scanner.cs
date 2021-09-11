@@ -30,10 +30,14 @@ namespace Compiler.Lexer
                 { "Console.WriteLine" ,TokenType.WriteLineKeyword},
                 { "Console.ReadLine" ,TokenType.ReadLineKeyword},
                 { "namespace" ,TokenType.NamespaceKeyword},
-                { "main" ,TokenType.MainKeyword},
+                { "Main" ,TokenType.MainKeyword},
                 { "void" ,TokenType.VoidKeyword},
                 { "static" ,TokenType.StaticKeyword},
                 { "string" ,TokenType.StringKeyword},
+                {"using" ,TokenType.UsingKeyword},
+                {"class",TokenType.ClassKeyword },
+                {"false",TokenType.FalseKeyword },
+                {"true",TokenType.TrueKeyword },
             };
 
             this.Tokens = new Dictionary<string, TokenType>
@@ -65,7 +69,8 @@ namespace Compiler.Lexer
                 { "++", TokenType.Increment },
                 { "--", TokenType.Decrement },
                { "[", TokenType.LeftBracket },
-               { "]", TokenType.RightBracket },
+               { "]", TokenType.RightBracket }
+
             };
             this.Rep = new Dictionary<string, TokenType>
             {
