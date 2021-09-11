@@ -26,6 +26,7 @@ namespace Compiler.Parser
 
         private Statement Program()
         {
+
             top = new Environment(top);
             //top.AddMethod("print", new Id(new Token { Lexeme = "print" }, Type.Void), new ArgumentExpression(new Token { Lexeme = "," }, new Id(new Token { Lexeme = "arg1" }, Type.String), new Id(new Token { Lexeme = "arg2" }, Type.String)));
             return Block();
@@ -35,32 +36,30 @@ namespace Compiler.Parser
         {
             DeclsUsing();
             NamespaceStmt();
-            MaintStmt();
-
             var previousSavedEnvironment = top;
             top = new Environment(top);
+            FunctionStmt();
+            
             Decls();
             var statements = Stmts();
             Match(TokenType.CloseBrace);
+            FunctionStmt();
             Match(TokenType.CloseBrace);
             Match(TokenType.CloseBrace);
             top = previousSavedEnvironment;
             return statements;
-           // return null;
         }
         private void NamespaceStmt()
         {
             Match(TokenType.NamespaceKeyword);
             Match(TokenType.Identifier);
             Match(TokenType.OpenBrace);
-
             Match(TokenType.ClassKeyword);
             Match(TokenType.Identifier);
             Match(TokenType.OpenBrace);
         }
         private void MaintStmt()
         {
-            Match(TokenType.StaticKeyword);
             Match(TokenType.VoidKeyword);
             Match(TokenType.MainKeyword);
             Match(TokenType.LeftParens);
@@ -70,6 +69,72 @@ namespace Compiler.Parser
             Match(TokenType.Identifier);
             Match(TokenType.RightParens);
             Match(TokenType.OpenBrace);
+        }
+        private void FunctionStmt()
+        {
+            if (this.lookAhead.TokenType == TokenType.PublicKeyword )
+            {
+                Match(TokenType.PublicKeyword);
+                TypeFunction();
+                FunctionStmt();
+            }
+            else if(this.lookAhead.TokenType == TokenType.StaticKeyword)
+            {
+                Match(TokenType.StaticKeyword);
+                MaintStmt();
+            }
+        }
+        private void TypeFunction()
+        {
+            if (this.lookAhead.TokenType == TokenType.VoidKeyword ||
+                    this.lookAhead.TokenType == TokenType.IntKeyword ||
+                    this.lookAhead.TokenType == TokenType.BoolKeyword ||
+                    this.lookAhead.TokenType == TokenType.FloatKeyword ||
+                    this.lookAhead.TokenType == TokenType.DateTimeKeyword)
+            {
+                MatchingTypesFunctions(this.lookAhead.TokenType);
+            }
+        }
+        private void MatchingTypesFunctions(TokenType token)
+        {
+            Match(token);
+            Match(TokenType.Identifier);
+            Match(TokenType.LeftParens);
+            ParamsFunction();
+            Match(TokenType.RightParens);
+            Match(TokenType.OpenBrace);
+            Decls();
+            Stmts();
+            Match(TokenType.CloseBrace);
+        }
+
+        private void ParamsFunction()
+        {
+           if (this.lookAhead.TokenType == TokenType.IntKeyword ||
+                this.lookAhead.TokenType == TokenType.FloatKeyword ||
+                this.lookAhead.TokenType == TokenType.StringKeyword ||
+                this.lookAhead.TokenType == TokenType.BoolKeyword ||
+                this.lookAhead.TokenType == TokenType.DateTimeKeyword)
+            {
+                ParamFunction();
+                ParamsFunction();
+            }
+        }
+        private void ParamFunction()
+        {
+            if (this.lookAhead.TokenType == TokenType.IntKeyword ||
+               this.lookAhead.TokenType == TokenType.FloatKeyword ||
+               this.lookAhead.TokenType == TokenType.StringKeyword ||
+               this.lookAhead.TokenType == TokenType.BoolKeyword ||
+               this.lookAhead.TokenType == TokenType.DateTimeKeyword)
+            {
+                Match(this.lookAhead.TokenType);
+                Match(TokenType.Identifier);
+                if (this.lookAhead.TokenType == TokenType.Comma)
+                {
+                    Match(TokenType.Comma);
+                }
+            }
         }
 
         private Statement Stmts()
@@ -83,6 +148,8 @@ namespace Compiler.Parser
 
         private Statement Stmt()
         {
+
+
             Expression expression;
             Statement statement1, statement2;
 

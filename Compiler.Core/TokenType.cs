@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -60,7 +60,8 @@ namespace Compiler.Core
         RightBracket,
         UsingKeyword,
         FalseConstant,
-        TrueConstant
+        TrueConstant,
+        PublicKeyword
         
         
     }

@@ -108,7 +108,7 @@ namespace Compiler.Parser
             for (var currentEnv = this; currentEnv != null; currentEnv = currentEnv.Previous)
             {
                 if (currentEnv._table.TryGetValue(lexeme, out var found))
-                {
+                { 
                     return found;
                 }
             }

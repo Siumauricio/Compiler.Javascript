@@ -23,7 +23,7 @@ namespace Compiler.Lexer
                 { "int", TokenType.IntKeyword },
                 { "float", TokenType.FloatKeyword },
                 { "bool", TokenType.BoolKeyword },
-                { "datetime", TokenType.DateTimeKeyword },
+                { "DateTime", TokenType.DateTimeKeyword },
                 { "for", TokenType.ForKeyword },
                 { "foreach", TokenType.ForeachKeyword },
                 { "while", TokenType.WhileKeyword },
@@ -38,6 +38,7 @@ namespace Compiler.Lexer
                 {"class",TokenType.ClassKeyword },
                 {"false",TokenType.FalseConstant },
                 {"true",TokenType.TrueConstant },
+                {"public",TokenType.PublicKeyword }
             };
 
             this.Tokens = new Dictionary<string, TokenType>
