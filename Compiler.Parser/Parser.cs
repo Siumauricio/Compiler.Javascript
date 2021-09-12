@@ -229,15 +229,36 @@ namespace Compiler.Parser
                         statement1 = Stmt();
                         return new ForStatement(expression as TypedExpression, statement1);
                     }
+                case TokenType.WriteLineKeyword:
+                    Match(TokenType.WriteLineKeyword);
+                    Match(TokenType.LeftParens);
+                    var isIdentifier = lookAhead;
+                    if (isIdentifier.TokenType == TokenType.Identifier)
+                    {
+                        var symbolToPrint = top.Get(this.lookAhead.Lexeme);
+                        Match(isIdentifier.TokenType);
+                        Match(TokenType.RightParens);
+                        Match(TokenType.SemiColon);
+                        return new WriteLineStatement(symbolToPrint.Id);
+                    }
+                    Match(TokenType.RightParens);
+                    Match(TokenType.SemiColon);
+                    return new WriteLineStatement();
+
+                case TokenType.ReadLineKeyword:
+                    Match(TokenType.ReadLineKeyword);
+                    Match(TokenType.LeftParens);
+                    Match(TokenType.RightParens);
+                    Match(TokenType.SemiColon);
+                    return new ReadLineStatement();
+
+
                 default:
                     return Block();
             }
         }
 
-        private void Increment() { 
-            
-        
-        }
+     
 
 
 

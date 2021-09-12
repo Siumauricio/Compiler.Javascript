@@ -61,8 +61,6 @@ namespace Compiler.Core
         UsingKeyword,
         FalseConstant,
         TrueConstant,
-        PublicKeyword
-        
-        
+        PublicKeyword,
     }
 }

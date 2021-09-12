@@ -9,6 +9,7 @@ namespace std.s
         {
             bool x=false;
             int y=10;
+            float t=10.10;
            while(x>10){ 
            y=12;
            }
@@ -16,6 +17,9 @@ namespace std.s
            for(int i=0; i<=10; --i){
                 y=11;
            }
+           Console.WriteLine(x);
+           Console.WriteLine();
+           Console.ReadLine();
 
         }
     }
