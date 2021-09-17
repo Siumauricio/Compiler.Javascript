@@ -5,23 +5,27 @@ namespace std.s
     class TestClass
     {
 
+
       static void Main(string[] args)
+
         {
-            bool x=false;
-            int y=10;
-            float t=10.10;
-           while(x>10){ 
-           y=12;
-           }
+           bool x=false;
+           int probar;
+           List<float> eo = new List<float>();
 
-           for(int i=0; i<=10; --i){
-                y=11;
-           }
-           Console.WriteLine(x);
-           Console.WriteLine();
-           Console.ReadLine();
 
+           foreach(DateTime hola in probar){
+                int f=0;
+           }  
+         
         }
-    }
-}
 
+        void program3(int hola){
+            int t=10;
+        
+        }
+
+
+    }
+
+}

@@ -62,5 +62,8 @@ namespace Compiler.Core
         FalseConstant,
         TrueConstant,
         PublicKeyword,
+        InKeyword,
+        ListKeyword,
+        NewKeyword
     }
 }

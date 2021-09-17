@@ -23,7 +23,7 @@ namespace Compiler.Parser
         {
             return Program();
         }
-
+        /*
         private Statement Program()
         {
 
@@ -48,7 +48,36 @@ namespace Compiler.Parser
             Match(TokenType.CloseBrace);
             top = previousSavedEnvironment;
             return statements;
+        }*/
+
+        private Statement Program()
+        {
+            
+            var previousSavedEnvironment = top;
+            top = new Environment(top);
+            DeclsUsing();
+            NamespaceStmt();
+
+            return Block();
         }
+
+        private Statement Block()
+        {
+            if (this.lookAhead.TokenType == TokenType.OpenBrace)
+            {
+                var previousSavedEnvironment = top;
+                top = new Environment(top);
+                Match(TokenType.OpenBrace);
+            }
+
+            FunctionStmt();
+            Decls();/////
+            var statements = Stmts();
+            Match(TokenType.CloseBrace);
+            //top = previousSavedEnvironment;
+            return null;
+        }
+
         private void NamespaceStmt()
         {
             Match(TokenType.NamespaceKeyword);
@@ -98,14 +127,16 @@ namespace Compiler.Parser
         private void MatchingTypesFunctions(TokenType token)
         {
             Match(token);
+            var identifier = lookAhead;
             Match(TokenType.Identifier);
             Match(TokenType.LeftParens);
             ParamsFunction();
             Match(TokenType.RightParens);
             Match(TokenType.OpenBrace);
             Decls();
-            Stmts();
-            Match(TokenType.CloseBrace);
+            Stmts();/////aqui esta el error
+            Match(TokenType.CloseBrace);///waiting close brace at te end of the function
+            
         }
 
         private void ParamsFunction()
@@ -148,7 +179,6 @@ namespace Compiler.Parser
 
         private Statement Stmt()
         {
-
 
             Expression expression;
             Statement statement1, statement2;
@@ -252,13 +282,35 @@ namespace Compiler.Parser
                     Match(TokenType.SemiColon);
                     return new ReadLineStatement();
 
+                case TokenType.ForeachKeyword: {
+                        Match(TokenType.ForeachKeyword);
+                        Match(TokenType.LeftParens);
+                        var result = lookAhead;
+                        if (result.TokenType == TokenType.IntKeyword || result.TokenType == TokenType.FloatConstant || result.TokenType == TokenType.BoolConstant
+                            || result.TokenType==TokenType.DateTimeKeyword) {
+                            Match(result.TokenType);
+                        }
+                        Match(TokenType.Identifier);
+                        Match(TokenType.InKeyword);
+                        var variableSaved = top.Get(this.lookAhead.Lexeme);
+                        Match(TokenType.Identifier);
+                        Match(TokenType.RightParens);
+                        var isBrace = lookAhead;
+                        if (isBrace.TokenType == TokenType.OpenBrace)
+                        {
+                         
+                            return Block();
+                        }
+                        
+                        return Block();
+                    }
 
                 default:
                     return Block();
             }
         }
 
-     
+        
 
 
 
@@ -401,7 +453,8 @@ namespace Compiler.Parser
                 this.lookAhead.TokenType == TokenType.FloatKeyword ||
                 this.lookAhead.TokenType == TokenType.StringKeyword ||
                 this.lookAhead.TokenType == TokenType.BoolKeyword ||
-                this.lookAhead.TokenType == TokenType.DateTimeKeyword)
+                this.lookAhead.TokenType == TokenType.DateTimeKeyword ||
+                this.lookAhead.TokenType==TokenType.ListKeyword)
             {
                 Decl();
                 Decls();
@@ -497,10 +550,91 @@ namespace Compiler.Parser
                     id = new Id(token, Type.Bool);
                     top.AddVariable(token.Lexeme, id);
                     break;
+
+                case TokenType.ListKeyword:
+                    Match(TokenType.ListKeyword);
+                    Match(TokenType.LessThan);
+                    token = lookAhead;
+                    if (token.TokenType == TokenType.IntKeyword)
+                    {
+                        AddListData(Type.Int, TokenType.IntKeyword);
+                    }
+                    else if (token.TokenType == TokenType.FloatKeyword) {
+
+                        AddListData(Type.Float, TokenType.FloatKeyword);
+                    } 
+                    else if (token.TokenType == TokenType.BoolKeyword)
+                    {
+                        AddListData(Type.Bool, TokenType.BoolKeyword);
+                    }
+                    else if (token.TokenType == TokenType.DateTimeKeyword)
+                    {
+                        AddListData(Type.DateTime, TokenType.DateTimeKeyword);
+                    }
+
+                    break;
+                        
+
                 default:
                             
                     break;
             }
+        }
+
+
+        private void AddListData(Type type, TokenType tokenType) {
+            Match(tokenType);
+            Match(TokenType.GreaterThan);
+            var token = lookAhead;
+            Match(TokenType.Identifier);
+            Match(TokenType.Assignation);
+            Match(TokenType.NewKeyword);
+             Match(TokenType.ListKeyword);
+              Match(TokenType.LessThan);
+             Match(tokenType);
+             Match(TokenType.GreaterThan);
+            Match(TokenType.LeftParens);
+            Match(TokenType.RightParens);
+            Match(TokenType.SemiColon);
+            var id = new Id(token, type);
+            top.AddVariable(token.Lexeme, id);
+
+        }
+        private TokenType TokenTypeVariableList(TokenType tokenType) {
+            if (tokenType == TokenType.IntKeyword)
+            {
+                return TokenType.IntKeyword;
+            }
+            else if (tokenType == TokenType.FloatKeyword)
+            {
+                return TokenType.FloatKeyword;
+            }
+            else if (tokenType == TokenType.BoolKeyword)
+            {
+                return TokenType.BoolKeyword;
+            }
+            else if (tokenType == TokenType.DateTimeKeyword)
+            {
+              return TokenType.DateTimeKeyword;
+            }
+            return tokenType;
+        }
+
+        private Type TypeVariableList(TokenType tokenType)
+        {
+            if (tokenType == TokenType.IntKeyword)
+            {
+                return Type.Int;
+            }
+            else if (tokenType == TokenType.FloatKeyword)
+            {
+                return Type.Float;
+            }
+            else if (tokenType == TokenType.BoolKeyword)
+            {
+                return Type.Bool;
+            }
+            return Type.DateTime;
         }
 
         private void DeclUsing()

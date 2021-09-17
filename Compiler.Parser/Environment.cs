@@ -1,4 +1,5 @@
-﻿using Compiler.Core.Expressions;
+﻿using Compiler.Core;
+using Compiler.Core.Expressions;
 using System;
 using System.Collections.Generic;
 
@@ -20,12 +21,13 @@ namespace Compiler.Parser
             Value = value;
         }
 
-        public Symbol(SymbolType symbolType, Id id, Expression attributes)
+        public Symbol(SymbolType symbolType, Id id, Expression attributes )
         {
             Attributes = attributes;
             SymbolType = symbolType;
             Id = id;
         }
+
         //public Symbol(SymbolType symbolType, LibraryOpe id, Expression attributes)
         //{
         //    Attributes = attributes;
@@ -37,6 +39,8 @@ namespace Compiler.Parser
         public Id Id { get; }
         public dynamic Value { get; set; }
         public Expression Attributes { get; }
+
+        public string LexemeFunction { get; set; }
     }
 
     public class Environment
@@ -57,6 +61,7 @@ namespace Compiler.Parser
                 throw new ApplicationException($"Variable {lexeme} already defined in current context");
             }
         }
+
         public void AddLibrary(string lexeme, Id id)
         {
             if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Library, id, null)))
@@ -108,7 +113,19 @@ namespace Compiler.Parser
             for (var currentEnv = this; currentEnv != null; currentEnv = currentEnv.Previous)
             {
                 if (currentEnv._table.TryGetValue(lexeme, out var found))
-                { 
+                {
+                    return found;
+                }
+            }
+            throw new ApplicationException($"Symbol {lexeme} doesn't exist in current context");
+        }
+
+        public Symbol GetA(string lexeme)
+        {
+            for (var currentEnv = this; currentEnv != null; currentEnv = currentEnv.Previous)
+            {
+                if (currentEnv._table.TryGetValue(lexeme, out var found))
+                {
                     return found;
                 }
             }
