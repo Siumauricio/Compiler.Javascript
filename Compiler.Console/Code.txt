@@ -4,20 +4,29 @@ namespace std.s
 {
     class TestClass
     {
+      public DateTime f2(){
 
+      }
+        
       static void Main(string[] args)
-        {
-            bool x=false;
-            int y=10;
-           while(x>10){ 
-           y=12;
-           }
 
-           for(int i=0; i<=10; --i){
-                y=11;
-           }
+        {
+            
+           bool x=false;
+         if(x>65){
+         }
+         bool f =false;
+
+         if(f>5){
+         
+            while(f>7){
+            int gh=25;
+            }
+            int t;
+         }
+         bool j=true;
 
         }
+
     }
 }
-

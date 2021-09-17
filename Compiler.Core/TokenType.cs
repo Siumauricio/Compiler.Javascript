@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -61,8 +61,10 @@ namespace Compiler.Core
         UsingKeyword,
         FalseConstant,
         TrueConstant,
-        PublicKeyword
-        
-        
+        PublicKeyword,
+        InKeyword,
+        ListKeyword,
+        NewKeyword
+
     }
 }

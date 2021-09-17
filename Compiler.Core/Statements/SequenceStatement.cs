@@ -17,5 +17,18 @@
             FirstStatement?.ValidateSemantic();
             NextStatement?.ValidateSemantic();
         }
+
+        public override void Interpret()
+        {
+            FirstStatement?.Interpret();
+            NextStatement?.Interpret();
+        }
+
+        public override string Generate(int tabs)
+        {
+            var code = FirstStatement?.Generate(tabs);
+            code += NextStatement?.Generate(tabs);
+            return code;
+        }
     }
 }

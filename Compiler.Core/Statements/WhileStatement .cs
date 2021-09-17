@@ -15,6 +15,16 @@ namespace Compiler.Core.Statements
         public TypedExpression Expression { get; }
         public Statement Statement { get; }
 
+        public override string Generate(int tabs)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Interpret()
+        {
+            throw new NotImplementedException();
+        }
+
         public override void ValidateSemantic()
         {
             if (Expression.GetExpressionType() != Type.Bool)

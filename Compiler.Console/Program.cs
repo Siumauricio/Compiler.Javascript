@@ -7,7 +7,6 @@ namespace Compiler.Console
 {
     class Program
     {
-
         static void Main(string[] args)
         {
             var code = File.ReadAllText("Code.txt").Replace(Environment.NewLine, "\n");
@@ -29,6 +28,5 @@ namespace Compiler.Console
             //var engine = new CompilerEngine(parser);
             //engine.Run();
         }
-
-   }
+    }
 }

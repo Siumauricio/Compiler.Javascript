@@ -25,7 +25,6 @@ namespace Compiler.Lexer
                 { "bool", TokenType.BoolKeyword },
                 { "DateTime", TokenType.DateTimeKeyword },
                 { "for", TokenType.ForKeyword },
-                { "foreach", TokenType.ForeachKeyword },
                 { "while", TokenType.WhileKeyword },
                 { "Console.WriteLine" ,TokenType.WriteLineKeyword},
                 { "Console.ReadLine" ,TokenType.ReadLineKeyword},
@@ -38,7 +37,12 @@ namespace Compiler.Lexer
                 {"class",TokenType.ClassKeyword },
                 {"false",TokenType.FalseConstant },
                 {"true",TokenType.TrueConstant },
-                {"public",TokenType.PublicKeyword }
+                {"public",TokenType.PublicKeyword },
+                { "foreach", TokenType.ForeachKeyword },
+                { "in", TokenType.InKeyword},
+                {"List", TokenType.ListKeyword},
+                {"new", TokenType.NewKeyword },
+
             };
 
             this.Tokens = new Dictionary<string, TokenType>
