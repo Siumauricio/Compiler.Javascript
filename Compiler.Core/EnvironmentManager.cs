@@ -42,6 +42,7 @@ namespace Compiler.Core
             throw new ApplicationException($"Symbol {lexeme} doesn't exist in current context");
         }
 
+
         public static Symbol GetSymbolForEvaluation(string lexeme)
         {
             foreach (var context in _interpretContexts)
@@ -73,6 +74,7 @@ namespace Compiler.Core
                 }
             }
         }
+
 
         public class Environment
         {

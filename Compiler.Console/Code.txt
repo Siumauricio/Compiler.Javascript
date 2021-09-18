@@ -1,31 +1,25 @@
 ﻿using System;
 using Compiler.Core;
+
 namespace std.s
 {
     class TestClass
     {
-      public DateTime f2(){
 
+      public DateTime f2(){
+      int t=10;
       }
         
       static void Main(string[] args)
 
         {
-            
-           bool x=false;
-         if(x>65){
-         }
-         bool f =false;
-
-         if(f>5){
-         
-            while(f>7){
-            int gh=25;
-            }
-            int t;
-         }
-         bool j=true;
-
+          int t;
+          List<int> list1=new List<int>();
+          List<bool> list2=new List<bool>();
+          foreach(int listado in list2){
+          
+          }
+               
         }
 
     }

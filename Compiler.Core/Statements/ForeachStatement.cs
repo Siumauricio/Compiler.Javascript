@@ -6,15 +6,15 @@ namespace Compiler.Core.Statements
 {
     public class ForEachStatement : Statement
     {
-        public ForEachStatement(TypedExpression expression, Statement statement)
-        {
-            Expression = expression;
-            Statement = statement;
-        }
-
         public ForEachStatement(Statement statement)
         {
             Statement = statement;
+        }
+
+
+        public ForEachStatement()
+        {
+
         }
 
         public TypedExpression Expression { get; }

@@ -1,8 +1,10 @@
 ﻿using Compiler.Core;
 using Compiler.Core.Expressions;
 using Compiler.Core.Interfaces;
+using Compiler.Core.Lists;
 using Compiler.Core.Statements;
 using System;
+using System.Collections.Generic;
 using Type = Compiler.Core.Type;
 
 namespace Compiler.Parser
@@ -11,7 +13,7 @@ namespace Compiler.Parser
     {
         private readonly IScanner scanner;
         private Token lookAhead;
-
+        private List<SymbolList> lst =new List<SymbolList>();
         public Parser(IScanner scanner)
         {
             this.scanner = scanner;
@@ -23,6 +25,7 @@ namespace Compiler.Parser
             return Program();
         }
 
+       
         private Statement Program()
         {
             EnvironmentManager.PushContext();
@@ -163,6 +166,7 @@ namespace Compiler.Parser
             Block();
         }
 
+
         private void ParamsFunction()
         {
             if (this.lookAhead.TokenType == TokenType.IntKeyword ||
@@ -244,6 +248,7 @@ namespace Compiler.Parser
                         Match(TokenType.LeftParens);
                         expression = Eq();
                         Match(TokenType.RightParens);
+
                         statement1 = Stmt();
                         if (this.lookAhead.TokenType != TokenType.ElseKeyword)
                         {
@@ -267,19 +272,16 @@ namespace Compiler.Parser
                         Match(TokenType.ForeachKeyword);
                         Match(TokenType.LeftParens);
                         var result = lookAhead;
-                        if (result.TokenType == TokenType.IntKeyword || result.TokenType == TokenType.FloatConstant || result.TokenType == TokenType.BoolConstant
-                            || result.TokenType == TokenType.DateTimeKeyword) {
-                            Match(result.TokenType);
-                        }
+                        verifyType(lookAhead);
                         Match(TokenType.Identifier);
                         Match(TokenType.InKeyword);
-                        var variableSaved = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
-                        Match(TokenType.Identifier);
+                        var variableExists = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
+                        MatchVariableType(result.TokenType, lookAhead);
                         Match(TokenType.RightParens);
-                        //statement1 = Stmt();
-
+                        statement1 = Stmt();
+                        return new ForEachStatement(statement1);
                         //FALTA RETORNAR UNA CLASE TIPO FOREACH
-                        return Block();
+                        //return Block();
                     }
                 case TokenType.WriteLineKeyword:
                     Match(TokenType.WriteLineKeyword);
@@ -309,6 +311,34 @@ namespace Compiler.Parser
             return null;
         }
 
+        private void verifyType(Token token) {
+
+            if (token.TokenType == TokenType.IntKeyword)
+            {
+                Match(TokenType.IntKeyword);
+                return;
+            }
+            else if (token.TokenType == TokenType.DateTimeKeyword)
+            {
+                Match(TokenType.DateTimeKeyword);
+                return;
+            }
+            else if (token.TokenType == TokenType.BoolKeyword)
+            {
+                Match(TokenType.BoolKeyword);
+                return;
+            }
+            else if (token.TokenType == TokenType.FloatKeyword)
+            {
+                Match(TokenType.FloatKeyword);
+                return;
+            }
+            else {
+                throw new ApplicationException($"Syntax error! expected variable but found {token.TokenType}. Line: {token.Line}, Column: {token.Column}");
+            }
+
+        }
+
         private Expression Eq()
         {
             var expression = Rel();
@@ -321,6 +351,9 @@ namespace Compiler.Parser
 
             return expression;
         }
+
+
+
 
         private Expression Rel()
         {
@@ -447,7 +480,8 @@ namespace Compiler.Parser
                 this.lookAhead.TokenType == TokenType.FloatKeyword ||
                 this.lookAhead.TokenType == TokenType.StringKeyword ||
                 this.lookAhead.TokenType == TokenType.BoolKeyword ||
-                this.lookAhead.TokenType == TokenType.DateTimeKeyword)
+                this.lookAhead.TokenType == TokenType.DateTimeKeyword||
+                this.lookAhead.TokenType==TokenType.ListKeyword)
             {
                 Decl();
                 Decls();
@@ -536,15 +570,82 @@ namespace Compiler.Parser
                     id = new Id(token, Type.Bool);
                     EnvironmentManager.AddVariable(token.Lexeme, id);
                     break;
+
+                case TokenType.ListKeyword:
+                    Match(TokenType.ListKeyword);
+                    Match(TokenType.LessThan);
+                    token = lookAhead;
+                    if (token.TokenType == TokenType.IntKeyword)
+                    {
+                        AddListData(Type.Int, TokenType.IntKeyword);
+                    }
+                    else if (token.TokenType == TokenType.FloatKeyword)
+                    {
+
+                        AddListData(Type.Float, TokenType.FloatKeyword);
+                    }
+                    else if (token.TokenType == TokenType.BoolKeyword)
+                    {
+                        AddListData(Type.Bool, TokenType.BoolKeyword);
+                    }
+                    else if (token.TokenType == TokenType.DateTimeKeyword)
+                    {
+                        AddListData(Type.DateTime, TokenType.DateTimeKeyword);
+                    }
+
+                    break;
+
                 default:
                     break;
             }
+        }
+
+
+        private void AddListData(Type type, TokenType tokenType)
+        {
+            Match(tokenType);
+            Match(TokenType.GreaterThan);
+            var token = lookAhead;
+            Match(TokenType.Identifier);
+            Match(TokenType.Assignation);
+            Match(TokenType.NewKeyword);
+            Match(TokenType.ListKeyword);
+            Match(TokenType.LessThan);
+            Match(tokenType);
+            Match(TokenType.GreaterThan);
+            Match(TokenType.LeftParens);
+            Match(TokenType.RightParens);
+            Match(TokenType.SemiColon);
+            var id = new Id(token, type);
+            var simbolList = new SymbolList
+            {
+                lexeme = token.Lexeme,
+                typeVariable = tokenType
+            };
+            this.lst.Add(simbolList);
+            EnvironmentManager.AddVariable(token.Lexeme, id);
+
         }
 
         private void Move()
         {
             this.lookAhead = this.scanner.GetNextToken();
         }
+
+        private void MatchVariableType(TokenType variablefirst, Token variable)
+        {
+        //    var symbolList = new SymbolList();
+          //  symbolList.lexeme = variable.Lexeme;
+            //symbolList.typeVariable = variablefirst;
+           // var result = this.lst.Exists(x => x.lexeme==variable.Lexeme && x.typeVariable== variablefirst);
+           
+            if (!this.lst.Exists(x => x.lexeme == variable.Lexeme && x.typeVariable == variablefirst))
+            {
+                throw new ApplicationException($"Syntax error! expected type variable but found {variablefirst}. Line: {variable.Line}, Column: {variable.Column}");
+            }
+            this.Move();
+        }
+
 
         private void Match(TokenType tokenType)
         {

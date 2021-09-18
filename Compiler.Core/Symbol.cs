@@ -25,11 +25,13 @@ namespace Compiler.Core
             Attributes = attributes;
             SymbolType = symbolType;
             Id = id;
+
         }
 
         public SymbolType SymbolType { get; }
         public Id Id { get; }
         public dynamic Value { get; set; }
         public Expression Attributes { get; }
+       
     }
 }
