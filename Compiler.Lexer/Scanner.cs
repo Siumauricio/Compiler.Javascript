@@ -42,6 +42,7 @@ namespace Compiler.Lexer
                 { "in", TokenType.InKeyword},
                 {"List", TokenType.ListKeyword},
                 {"new", TokenType.NewKeyword },
+                {".add", TokenType.AddKeyword }
 
             };
 
@@ -107,6 +108,8 @@ namespace Compiler.Lexer
                         lexeme.Append(currentChar);
                         currentChar = PeekNextChar();
                     }
+
+
 
                     if (this.keywords.ContainsKey(lexeme.ToString()))
                     {

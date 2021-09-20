@@ -64,7 +64,8 @@ namespace Compiler.Core
         PublicKeyword,
         InKeyword,
         ListKeyword,
-        NewKeyword
+        NewKeyword,
+        AddKeyword,
 
     }
 }

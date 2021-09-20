@@ -22,11 +22,14 @@ namespace Compiler.Console
             //        break;
             //    }
             //}
-            //}
             var parser = new Parser.Parser(scanner);
             var ast = parser.Parse();
-            //var engine = new CompilerEngine(parser);
-            //engine.Run();
+            // var engine = new CompilerEngine(parser);
+            // engine.Run();
+
+
         }
+
+
     }
 }

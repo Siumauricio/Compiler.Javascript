@@ -16,8 +16,11 @@ namespace std.s
           int t;
           List<int> list1=new List<int>();
           List<bool> list2=new List<bool>();
-          foreach(int listado in list2){
-          
+          list1.add(10);
+          list1.add(20);
+          foreach(int listado in list1){
+          t=10;
+          Console.WriteLine(t);
           }
                
         }

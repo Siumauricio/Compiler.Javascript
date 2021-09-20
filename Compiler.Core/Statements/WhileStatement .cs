@@ -17,8 +17,16 @@ namespace Compiler.Core.Statements
 
         public override string Generate(int tabs)
         {
-            throw new NotImplementedException();
+            var code = GetCodeInit(tabs);
+            code += $"while({Expression.Generate()})";
+            code += "{";
+            code += $"{Environment.NewLine}";
+            code += $"{Statement.Generate(tabs+1)}{Environment.NewLine}";
+            code += "}";
+            return code;
         }
+
+
 
         public override void Interpret()
         {

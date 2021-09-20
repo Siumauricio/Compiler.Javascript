@@ -22,6 +22,7 @@ namespace Compiler.Parser
 
         public Statement Parse()
         {
+
             return Program();
         }
 
@@ -38,7 +39,6 @@ namespace Compiler.Parser
             var block = Block();
             Match(TokenType.CloseBrace);
             //block.ValidateSemantic();
-            // var code = block.Generate(0);
             //code = code.Replace($"else:{Environment.NewLine}\tif", "elif");
             return block;
         }
@@ -77,6 +77,7 @@ namespace Compiler.Parser
                 Match(TokenType.Identifier);
                 Match(TokenType.OpenBrace);
             }
+
         }
 
         private Statement Block()
@@ -179,6 +180,7 @@ namespace Compiler.Parser
                 ParamsFunction();
             }
         }
+
         private void ParamFunction()
         {
             if (this.lookAhead.TokenType == TokenType.IntKeyword ||
@@ -217,6 +219,8 @@ namespace Compiler.Parser
             }
         }
 
+
+
         private Statement Stmts()
         {
             if (this.lookAhead.TokenType == TokenType.CloseBrace)
@@ -226,20 +230,89 @@ namespace Compiler.Parser
             return new SequenceStatement(Stmt(), Stmts());
         }
 
+
+        private void ValidateConstant(Token token, TokenType validate) {
+            if (token.TokenType == TokenType.IntConstant && validate == TokenType.IntKeyword)
+            {
+                var constant = new Constant(token, Type.Int);
+                Match(TokenType.IntConstant);
+             
+
+            }
+            else if (token.TokenType == TokenType.FloatConstant && validate == TokenType.FloatKeyword)
+            {
+                var constant = new Constant(token, Type.Float);
+
+                Match(TokenType.FloatConstant);
+             
+
+            }
+            else if (token.TokenType == TokenType.TrueConstant && validate == TokenType.BoolKeyword)
+            {
+                var constant = new Constant(token, Type.Bool);
+
+                Match(TokenType.TrueConstant);
+            
+            }
+            else if (token.TokenType == TokenType.DateTimeConstant && validate == TokenType.DateTimeKeyword)
+            {
+                var constant = new Constant(token, Type.DateTime);
+
+                Match(TokenType.DateTimeConstant);
+             
+            }
+            else if (token.TokenType == TokenType.FalseConstant && validate == TokenType.BoolKeyword)
+            {
+                var constant = new Constant(token, Type.Bool);
+
+                Match(TokenType.FalseConstant);
+            }
+            else {
+                throw new ApplicationException($"Syntax error! expected another type variable but found {token.TokenType}. Line: {token.Line}, Column: {token.Column}");
+
+            }
+
+        }
+
         private Statement Stmt()
         {
             Expression expression;
             Statement statement1, statement2;
             switch (this.lookAhead.TokenType)
             {
-                case TokenType.Identifier:
+                case TokenType.Identifier: ////////////// aqui es
                     {
+                        string[] resultSplit;
+                        if (lookAhead.Lexeme.Contains(".add")&& lookAhead.Lexeme[lookAhead.Lexeme.Length-1] =='d')
+                        {
+                            resultSplit = lookAhead.Lexeme.Split(".");
+                          //  EnvironmentManager.GetSymbol(resultSplit[0]);
+                            this.lookAhead.Lexeme = resultSplit[0];
+                        }
                         var symbol = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
+                        var variable = lookAhead;
                         Match(TokenType.Identifier);
+                        if (lookAhead.TokenType == TokenType.LeftParens) {
+                           // Match(TokenType.AddKeyword);
+                            Match(TokenType.LeftParens);
+                            var data = GetSymbolListByLexeme(variable.Lexeme);
+                          //  Match(TokenType.Identifier);
+                            if (data == null) {
+                                throw new ApplicationException($"Syntax error! expected type variable list but found {variable}. Line: {variable.Line}, Column: {variable.Column}");
+                            }
+                            ValidateConstant(lookAhead, data.typeVariable);
+                           // var constant = new Constant(lookAhead, Type.Int);
+                           // Match(data.typeVariable);
+                            Match(TokenType.RightParens);
+                            Match(TokenType.SemiColon);
+                            return new ListStatement();
+                            
+                        }
                         if (this.lookAhead.TokenType == TokenType.Assignation)
                         {
                             return AssignStmt(symbol.Id);
                         }
+
                         return CallStmt(symbol);
                     }
                 case TokenType.IfKeyword:
@@ -275,11 +348,12 @@ namespace Compiler.Parser
                         verifyType(lookAhead);
                         Match(TokenType.Identifier);
                         Match(TokenType.InKeyword);
-                        var variableExists = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
+                        var variableList = lookAhead;
+                        var variableExists = EnvironmentManager.GetSymbol(variableList.Lexeme);
                         MatchVariableType(result.TokenType, lookAhead);
                         Match(TokenType.RightParens);
                         statement1 = Stmt();
-                        return new ForEachStatement(statement1);
+                        return new ForEachStatement(result, variableList, statement1);
                         //FALTA RETORNAR UNA CLASE TIPO FOREACH
                         //return Block();
                     }
@@ -351,7 +425,6 @@ namespace Compiler.Parser
 
             return expression;
         }
-
 
 
 
@@ -634,16 +707,17 @@ namespace Compiler.Parser
 
         private void MatchVariableType(TokenType variablefirst, Token variable)
         {
-        //    var symbolList = new SymbolList();
-          //  symbolList.lexeme = variable.Lexeme;
-            //symbolList.typeVariable = variablefirst;
-           // var result = this.lst.Exists(x => x.lexeme==variable.Lexeme && x.typeVariable== variablefirst);
            
             if (!this.lst.Exists(x => x.lexeme == variable.Lexeme && x.typeVariable == variablefirst))
             {
                 throw new ApplicationException($"Syntax error! expected type variable but found {variablefirst}. Line: {variable.Line}, Column: {variable.Column}");
             }
             this.Move();
+        }
+
+        private SymbolList GetSymbolListByLexeme(string lexeme) {
+
+            return this.lst.Find(x => x.lexeme == lexeme);
         }
 
 
