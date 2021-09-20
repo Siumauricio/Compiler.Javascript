@@ -42,7 +42,7 @@ namespace Compiler.Core
         DateTimeKeyword,
         ClassKeyword,
         Ampersand,
-        VerticalLine,
+       VerticalLine,
         AndOperator,
         OrOperator,
         Increment,

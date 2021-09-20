@@ -1,24 +1,30 @@
 ﻿using Compiler.Core.Expressions;
 using Compiler.Core.Interfaces;
 using System;
+using System.Collections.Generic;
 
 namespace Compiler.Core.Statements
 {
     public class WhileStatement : Statement
     {
-        public WhileStatement(TypedExpression expression, Statement statement)
+        public WhileStatement(List<TypedExpression> expression, Statement statement)
         {
             Expression = expression;
             Statement = statement;
         }
 
-        public TypedExpression Expression { get; }
+        public List<TypedExpression> Expression { get; }
         public Statement Statement { get; }
+
 
         public override string Generate(int tabs)
         {
             var code = GetCodeInit(tabs);
-            code += $"while({Expression.Generate()})";
+            code += $"while(";
+            foreach (var data in Expression){
+                code += $"{data.Generate()}";
+            }
+            code += ")";
             code += "{";
             code += $"{Environment.NewLine}";
             code += $"{Statement.Generate(tabs+1)}{Environment.NewLine}";
@@ -30,14 +36,22 @@ namespace Compiler.Core.Statements
 
         public override void Interpret()
         {
-            throw new NotImplementedException();
+            foreach (var data in Expression)
+            {
+                if (data.Evaluate())
+                {
+                    Statement.Interpret();
+                }
+            }
         }
 
         public override void ValidateSemantic()
         {
-            if (Expression.GetExpressionType() != Type.Bool)
-            {
-                throw new ApplicationException("A boolean is required in while expression");
+            foreach (var data in Expression) {
+                if (data.GetExpressionType() != Type.Bool)
+                {
+                    throw new ApplicationException("A boolean is required in while expression");
+                }
             }
         }
     }

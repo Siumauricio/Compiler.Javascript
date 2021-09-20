@@ -283,30 +283,30 @@ namespace Compiler.Parser
                 case TokenType.Identifier: ////////////// aqui es
                     {
                         string[] resultSplit;
-                        if (lookAhead.Lexeme.Contains(".add")&& lookAhead.Lexeme[lookAhead.Lexeme.Length-1] =='d')
+                        if (lookAhead.Lexeme.Contains(".add") && lookAhead.Lexeme[lookAhead.Lexeme.Length - 1] == 'd')
                         {
                             resultSplit = lookAhead.Lexeme.Split(".");
-                          //  EnvironmentManager.GetSymbol(resultSplit[0]);
+                            //  EnvironmentManager.GetSymbol(resultSplit[0]);
                             this.lookAhead.Lexeme = resultSplit[0];
                         }
                         var symbol = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
                         var variable = lookAhead;
                         Match(TokenType.Identifier);
                         if (lookAhead.TokenType == TokenType.LeftParens) {
-                           // Match(TokenType.AddKeyword);
+                            // Match(TokenType.AddKeyword);
                             Match(TokenType.LeftParens);
                             var data = GetSymbolListByLexeme(variable.Lexeme);
-                          //  Match(TokenType.Identifier);
+                            //  Match(TokenType.Identifier);
                             if (data == null) {
                                 throw new ApplicationException($"Syntax error! expected type variable list but found {variable}. Line: {variable.Line}, Column: {variable.Column}");
                             }
                             ValidateConstant(lookAhead, data.typeVariable);
-                           // var constant = new Constant(lookAhead, Type.Int);
-                           // Match(data.typeVariable);
+                            // var constant = new Constant(lookAhead, Type.Int);
+                            // Match(data.typeVariable);
                             Match(TokenType.RightParens);
                             Match(TokenType.SemiColon);
                             return new ListStatement();
-                            
+
                         }
                         if (this.lookAhead.TokenType == TokenType.Assignation)
                         {
@@ -319,26 +319,60 @@ namespace Compiler.Parser
                     {
                         Match(TokenType.IfKeyword);
                         Match(TokenType.LeftParens);
+                        List<TypedExpression> data = new List<TypedExpression>();
                         expression = Eq();
+                        data.Add(expression as TypedExpression);
+                        for (int i = 0; i < data.Count; i++)
+                        {
+                            if (lookAhead.TokenType == TokenType.AndOperator)
+                            {
+                                Match(TokenType.AndOperator);
+                                expression = Eq();
+                                data.Add(expression as TypedExpression);
+                            }
+                            else if (lookAhead.TokenType == TokenType.OrOperator)
+                            {
+                                Match(TokenType.OrOperator);
+                                expression = Eq();
+                                data.Add(expression as TypedExpression);
+                            }
+                        }
                         Match(TokenType.RightParens);
 
                         statement1 = Stmt();
                         if (this.lookAhead.TokenType != TokenType.ElseKeyword)
                         {
-                            return new IfStatement(expression as TypedExpression, statement1);
+                            return new IfStatement(data, statement1);
                         }
                         Match(TokenType.ElseKeyword);
                         statement2 = Stmt();
-                        return new ElseStatement(expression as TypedExpression, statement1, statement2);
+                        return new ElseStatement(data, statement1, statement2);
                     }
                 case TokenType.WhileKeyword:
                     {
                         Match(TokenType.WhileKeyword);
                         Match(TokenType.LeftParens);
+                        List<TypedExpression> data = new List<TypedExpression>();
                         expression = Eq();
+                        data.Add(expression as TypedExpression);
+                        for (int i = 0; i < data.Count; i++)
+                        {
+                            if (lookAhead.TokenType == TokenType.AndOperator)
+                            {
+                                Match(TokenType.AndOperator);
+                                expression = Eq();
+                                data.Add(expression as TypedExpression);
+                            }
+                            else if (lookAhead.TokenType == TokenType.OrOperator)
+                            {
+                                Match(TokenType.OrOperator);
+                                expression = Eq();
+                                data.Add(expression as TypedExpression);
+                            }
+                        }
                         Match(TokenType.RightParens);
                         statement1 = Stmt();
-                        return new WhileStatement(expression as TypedExpression, statement1);
+                        return new WhileStatement(data, statement1);
                     }
                 case TokenType.ForeachKeyword:
                     {
@@ -361,13 +395,26 @@ namespace Compiler.Parser
                     Match(TokenType.WriteLineKeyword);
                     Match(TokenType.LeftParens);
                     var isIdentifier = lookAhead;
+                    var dataVariable = new List<Symbol>();
                     if (isIdentifier.TokenType == TokenType.Identifier)
                     {
                         var symbolToPrint = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
-                        Match(isIdentifier.TokenType);
+                     
+                        Match(TokenType.Identifier);
+                        dataVariable.Add(symbolToPrint);
+                        for (int i = 0; i < dataVariable.Count; i++)
+                        {
+                            if (lookAhead.TokenType == TokenType.Plus)
+                            {
+                                Match(TokenType.Plus);
+                                symbolToPrint = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
+                                Match(TokenType.Identifier);
+                                dataVariable.Add(symbolToPrint);
+                            }
+                        }
                         Match(TokenType.RightParens);
                         Match(TokenType.SemiColon);
-                        return new WriteLineStatement(symbolToPrint.Id);
+                        return new WriteLineStatement(dataVariable);
                     }
                     Match(TokenType.RightParens);
                     Match(TokenType.SemiColon);

@@ -1,41 +1,54 @@
 ﻿using Compiler.Core.Expressions;
 using Compiler.Core.Interfaces;
 using System;
+using System.Collections.Generic;
 
 namespace Compiler.Core.Statements
 {
     public class IfStatement : Statement
     {
-        public IfStatement(TypedExpression expression, Statement statement)
+        public IfStatement(List<TypedExpression> expression, Statement statement)
         {
             Expression = expression;
             Statement = statement;
         }
 
-        public TypedExpression Expression { get; }
+        public List<TypedExpression> Expression { get; }
         public Statement Statement { get; }
 
         public override string Generate(int tabs)
         {
             var code = GetCodeInit(tabs);
-            code += $"if({Expression.Generate()}):{Environment.NewLine}";
+            code += $"if(";
+            foreach (var data in Expression) {
+                code += $"{data.Generate()}";
+            }
+            code += $")";
+            code += "{";
+            code += $"{Environment.NewLine}";
             code += $"{Statement.Generate(tabs + 1)}{Environment.NewLine}";
             return code;
         }
 
         public override void Interpret()
         {
-            if (Expression.Evaluate())
-            {
-                Statement.Interpret();
+            foreach (var data in Expression) {
+                if (data.Evaluate())
+                {
+                    Statement.Interpret();
+                }
             }
         }
 
         public override void ValidateSemantic()
         {
-            if (Expression.GetExpressionType() != Type.Bool)
-            {
-                throw new ApplicationException("A boolean is required in ifs");
+
+            foreach (var data in Expression) {
+                if (data.GetExpressionType() != Type.Bool)
+                {
+                    throw new ApplicationException("A boolean is required in ifs");
+                }
+
             }
         }
     }

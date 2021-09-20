@@ -13,16 +13,19 @@ namespace std.s
       static void Main(string[] args)
 
         {
-          int t;
-          List<int> list1=new List<int>();
-          List<bool> list2=new List<bool>();
-          list1.add(10);
-          list1.add(20);
-          foreach(int listado in list1){
-          t=10;
-          Console.WriteLine(t);
-          }
-               
+         int t=10;
+         int p=30;
+         if(t>10 && t>=20 || p<=30){
+            int ss=10;
+         }else{
+            int eo=10;
+         }
+
+         while(t>10 && t>=20 && p<=30){
+            int p=15;
+         }
+         Console.WriteLine(t);
+
         }
 
     }
