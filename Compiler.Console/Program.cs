@@ -7,7 +7,7 @@ namespace Compiler.Console
 {
     class Program {
         static void Main(string[] args) {
-            var code = File.ReadAllText("C:\\Users\\enrik\\Documents\\GitHub\\Compiler.Javascript\\Compiler.Console\\Code.txt").Replace(Environment.NewLine, "\n");
+            var code = File.ReadAllText("Code.txt").Replace(Environment.NewLine, "\n");
             var input = new Input(code);
             var scanner = new Scanner(input);
             //while (true)

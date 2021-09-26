@@ -131,13 +131,12 @@ namespace Compiler.Parser {
             }
             buffer += bff;
             bff = ""+Environment.NewLine;
-
-            //EnvironmentManager.PopContext();
             EnvironmentManager.PushContext();
         }
         private void GenerateCodeFunctionMain() {
             buffer += bff;
             buffer = buffer.Substring(0, buffer.Length-3);
+            Console.WriteLine(buffer);
         }
         private Statement Function() {
             if (this.lookAhead.TokenType == TokenType.VoidKeyword || this.lookAhead.TokenType == TokenType.IntKeyword || this.lookAhead.TokenType == TokenType.BoolKeyword ||   this.lookAhead.TokenType == TokenType.FloatKeyword ||this.lookAhead.TokenType == TokenType.DateTimeKeyword) {
@@ -294,12 +293,11 @@ namespace Compiler.Parser {
                             return new DecrementStatement(variable, @operator);
                         }
 
-                        if (this.lookAhead.TokenType == TokenType.Assignation) {
-                            return AssignStmt(symbol.Id);
-                        }
+                        //if (this.lookAhead.TokenType == TokenType.Assignation) {
+                        //    return AssignStmt(symbol.Id);
+                        //}
 
                         if (symbol.SymbolType == SymbolType.Method) {
-                         //   Match(TokenType.Identifier);
                             var Assign = GetFunctionStmt(symbol) as ParamsValueFunction;
                             bff += Assign.Id.Token.Lexeme + " (";
                             if (Assign.Params.Count != Assign.Attributes.Count) {
@@ -329,9 +327,9 @@ namespace Compiler.Parser {
 
                             }
                             bff += ");" + Environment.NewLine;
+                            Decls();
                             return Assign;
                         } else {
-                            Match(TokenType.Identifier);
                             if (this.lookAhead.TokenType == TokenType.Assignation) {
                                 var Assign = AssignStmt(symbol.Id);
                                 bff += Assign.Generate();
@@ -339,8 +337,6 @@ namespace Compiler.Parser {
                                 return Assign;
                             }
                         }
-                        /////////////////////eesto es lo tuyo
-
                         return CallStmt(symbol);
                     }
 
