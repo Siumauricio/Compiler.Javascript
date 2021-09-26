@@ -15,13 +15,14 @@ namespace std.s
          bool x=false;
          int x3=25;
          int f56=25;
-            f2(25,25,x3+f566);
-          
+         List<int> data=new List<bool>();
+            f2(25,25,x3+f56);
+          data.add(10);
          if(x>65){
          }
          bool f =false;
 
-         if(f>5){
+         if(f>5 && x3>10){
          
             if(f>7){
             int gh=25;

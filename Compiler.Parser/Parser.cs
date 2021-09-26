@@ -257,21 +257,22 @@ namespace Compiler.Parser {
                 case TokenType.Identifier: 
                     {
                         string[] resultSplit;
-
+                        bool isList = false;
                         if (lookAhead.Lexeme.Contains(".add") && lookAhead.Lexeme[lookAhead.Lexeme.Length - 1] == 'd') {
                             resultSplit = lookAhead.Lexeme.Split(".");
                             //  EnvironmentManager.GetSymbol(resultSplit[0]);
                             this.lookAhead.Lexeme = resultSplit[0];
+                            isList = true;
                         }
                         var symbol = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
                         var variable = lookAhead;
                         Match(TokenType.Identifier);
-                        if (lookAhead.TokenType == TokenType.LeftParens) {
+                        if (lookAhead.TokenType == TokenType.LeftParens && isList) {
                             // Match(TokenType.AddKeyword);
                             Match(TokenType.LeftParens);
                             var data = GetSymbolListByLexeme(variable.Lexeme);
                             //  Match(TokenType.Identifier);
-                            if (data == null) {
+                            if (data == null) {////////////////////list
                                 throw new ApplicationException($"Syntax error! expected type variable list but found {variable}. Line: {variable.Line}, Column: {variable.Column}");
                             }
                             ValidateConstant(lookAhead, data.typeVariable);
@@ -296,8 +297,9 @@ namespace Compiler.Parser {
                         if (this.lookAhead.TokenType == TokenType.Assignation) {
                             return AssignStmt(symbol.Id);
                         }
+
                         if (symbol.SymbolType == SymbolType.Method) {
-                            Match(TokenType.Identifier);
+                         //   Match(TokenType.Identifier);
                             var Assign = GetFunctionStmt(symbol) as ParamsValueFunction;
                             bff += Assign.Id.Token.Lexeme + " (";
                             if (Assign.Params.Count != Assign.Attributes.Count) {
