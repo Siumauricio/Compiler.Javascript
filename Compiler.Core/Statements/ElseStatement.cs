@@ -20,7 +20,7 @@ namespace Compiler.Core.Statements
 
         public override string Generate()
         {
-            var code = GetCodeInit(tabs);
+            var code = GetCodeInit();
             code += $"if(";
             foreach (var data in Expression)
             {
@@ -29,14 +29,14 @@ namespace Compiler.Core.Statements
             code += $")";
             code += "{";
             code += $"{Environment.NewLine}";
-            code += $"{TrueStatement.Generate(tabs + 1)}{Environment.NewLine}";
-            for (int i = 0; i < tabs; i++)
-            {
-                code += "\t";
-            }
+            code += $"{TrueStatement.Generate()}{Environment.NewLine}";
+            //for (int i = 0; i < tabs; i++)
+            //{
+            //    code += "\t";
+            //}
             code += "}else{";
             code+=$"{Environment.NewLine}";
-            code += $"{FalseStatement.Generate(tabs + 1)}{Environment.NewLine}";
+            code += $"{FalseStatement.Generate()}{Environment.NewLine}";
             code += "}";
             return code;
         }

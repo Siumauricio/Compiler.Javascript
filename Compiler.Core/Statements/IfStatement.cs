@@ -19,9 +19,9 @@ namespace Compiler.Core.Statements
 
         public List<Token> Logics { get; }
 
-        public override string Generate(int tabs)
+        public override string Generate()
         {
-            var code = GetCodeInit(tabs);
+            var code = GetCodeInit();
             var index = 0;
             code += $"if(";
             foreach (var data in Expression) {
@@ -36,7 +36,7 @@ namespace Compiler.Core.Statements
             code += $")";
             code += "{";
             code += $"{Environment.NewLine}";
-            code += $"{Statement.Generate(tabs + 1)}{Environment.NewLine}";
+            code += $"{Statement.Generate()}{Environment.NewLine}";
             return code;
         }
 

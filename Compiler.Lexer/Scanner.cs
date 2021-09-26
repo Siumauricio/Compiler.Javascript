@@ -39,7 +39,7 @@ namespace Compiler.Lexer {
                 { "in", TokenType.InKeyword},
                 {"List", TokenType.ListKeyword},
                 {"new", TokenType.NewKeyword },
-                {".add", TokenType.AddKeyword }
+                {".add", TokenType.AddKeyword },
 
                 {"return", TokenType.ReturnKeyword },
             };

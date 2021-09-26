@@ -36,7 +36,7 @@ namespace Compiler.Core.Statements
             var code = $"{Token2.Lexeme}.foreach(";
             code += $"function({Token1.Lexeme})";
             code += "{";
-            code += $"{Statement.Generate(tabs+1)}";
+            code += $"{Statement.Generate()}";
             code += "}";
             return code;
         }

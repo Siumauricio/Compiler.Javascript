@@ -17,7 +17,7 @@ namespace Compiler.Core.Statements
         public Token Token2 { get; }
 
 
-        public override string Generate(int tabs)
+        public override string Generate()
         {
             var code = $"{Token1.Lexeme}";
             code += $"{Token2.Lexeme};";

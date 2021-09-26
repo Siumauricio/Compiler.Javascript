@@ -250,14 +250,15 @@ namespace Compiler.Parser {
 
         private Statement Stmt()
         {
-            Expression expression;
+            Expression expression = null;
             Statement statement1, statement2;
             switch (this.lookAhead.TokenType)
             {
-                case TokenType.Identifier: ////////////// aqui es
+                case TokenType.Identifier: 
                     {
-                        if (lookAhead.Lexeme.Contains(".add") && lookAhead.Lexeme[lookAhead.Lexeme.Length - 1] == 'd')
-                        {
+                        string[] resultSplit;
+
+                        if (lookAhead.Lexeme.Contains(".add") && lookAhead.Lexeme[lookAhead.Lexeme.Length - 1] == 'd') {
                             resultSplit = lookAhead.Lexeme.Split(".");
                             //  EnvironmentManager.GetSymbol(resultSplit[0]);
                             this.lookAhead.Lexeme = resultSplit[0];
@@ -282,45 +283,33 @@ namespace Compiler.Parser {
 
                         }
                         var @operator = lookAhead;
-                        if (this.lookAhead.TokenType == TokenType.Increment)
-                        {
+                        if (this.lookAhead.TokenType == TokenType.Increment) {
                             Match(TokenType.Increment);
                             Match(TokenType.SemiColon);
                             return new IncrementStatement(variable, @operator);
-                        }
-                        else if (this.lookAhead.TokenType == TokenType.Decrement) {
+                        } else if (this.lookAhead.TokenType == TokenType.Decrement) {
                             Match(TokenType.Decrement);
                             Match(TokenType.SemiColon);
                             return new DecrementStatement(variable, @operator);
                         }
 
-                        if (this.lookAhead.TokenType == TokenType.Assignation)
-                        {
+                        if (this.lookAhead.TokenType == TokenType.Assignation) {
                             return AssignStmt(symbol.Id);
-//////////////////////esto es lo mio
-
-        private Statement Stmt() {
-            Expression expression = null;
-            
-            Statement statement1, statement2;
-            switch (this.lookAhead.TokenType) {
-                case TokenType.Identifier: {
-                     string[] resultSplit;
-                        var symbol = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
+                        }
                         if (symbol.SymbolType == SymbolType.Method) {
                             Match(TokenType.Identifier);
                             var Assign = GetFunctionStmt(symbol) as ParamsValueFunction;
-                            bff += Assign.Id.Token.Lexeme+" (";
+                            bff += Assign.Id.Token.Lexeme + " (";
                             if (Assign.Params.Count != Assign.Attributes.Count) {
                                 throw new ApplicationException($"Syntax error! Function {Assign.Id.Token.Lexeme} Accept {Assign.Params.Count} parameters and you send {Assign.Attributes.Count} parameters");
 
                             }
                             for (int i = 0; i < Assign.Params.Count; i++) {
                                 Type tipo = Assign.Attributes[i].type;
-                               
+
                                 if ((Assign.Params[i].Id.GetExpressionType() != Assign.Attributes[i].type) && tipo?.GetType() != null) {
                                     throw new ApplicationException($"Syntax error! Param Type Expected {Assign.Params[i].Id.GetExpressionType()} but Found {Assign.Attributes[i].type}");
-                                }else if (Assign.Attributes[i] is ArithmeticOperator) {
+                                } else if (Assign.Attributes[i] is ArithmeticOperator) {
                                     var convert = Assign.Attributes[i] as ArithmeticOperator;
                                     var type = convert.GetExpressionType();
                                     if (type == Assign.Params[i].Id.GetExpressionType()) {
@@ -332,12 +321,12 @@ namespace Compiler.Parser {
                                 } else {
                                     bff += Assign.Attributes[i].Token.Lexeme;
                                 }
-                                if ((i+1) != Assign.Params.Count) {
+                                if ((i + 1) != Assign.Params.Count) {
                                     bff += ",";
                                 }
-                               
+
                             }
-                            bff += ");"+Environment.NewLine;
+                            bff += ");" + Environment.NewLine;
                             return Assign;
                         } else {
                             Match(TokenType.Identifier);
@@ -348,47 +337,45 @@ namespace Compiler.Parser {
                                 return Assign;
                             }
                         }
-                            /////////////////////eesto es lo tuyo
+                        /////////////////////eesto es lo tuyo
 
                         return CallStmt(symbol);
                     }
+
+
                 case TokenType.IfKeyword: {
                         Match(TokenType.IfKeyword);
                         Match(TokenType.LeftParens);
                         List<TypedExpression> data = new List<TypedExpression>();
                         List<Token> Logics = new List<Token>();
                         expression = Eq();
+                        if (expression is RelationalExpression) {
+                            RelationalExpression result = expression as RelationalExpression;
+                            bff += "if(" + result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme + "){" + Environment.NewLine;
+                        }
                         data.Add(expression as TypedExpression);
-                        for (int i = 0; i < data.Count; i++)
-                        {
-                            if (lookAhead.TokenType == TokenType.AndOperator)
-                            {
+                        for (int i = 0; i < data.Count; i++) {
+                            if (lookAhead.TokenType == TokenType.AndOperator) {
                                 Logics.Add(lookAhead);
                                 Match(TokenType.AndOperator);
                                 expression = Eq();
                                 data.Add(expression as TypedExpression);
-                            }
-                            else if (lookAhead.TokenType == TokenType.OrOperator)
-                            {
+                            } else if (lookAhead.TokenType == TokenType.OrOperator) {
                                 Logics.Add(lookAhead);
                                 Match(TokenType.OrOperator);
                                 expression = Eq();
                                 data.Add(expression as TypedExpression);
                             }
-                        if (expression is RelationalExpression) {
-                            RelationalExpression result = expression as RelationalExpression;
-                            bff += "if(" + result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme + "){"+Environment.NewLine;
                         }
-                        Match(TokenType.RightParens);
+                            Match(TokenType.RightParens);
 
-                        statement1 = Stmt();
-                        if (this.lookAhead.TokenType != TokenType.ElseKeyword)
-                        {
-                            return new IfStatement(data, statement1,Logics);
-                        }
-                        Match(TokenType.ElseKeyword);
-                        statement2 = Stmt();
-                        return new ElseStatement(data, statement1, statement2);
+                            statement1 = Stmt();
+                            if (this.lookAhead.TokenType != TokenType.ElseKeyword) {
+                                return new IfStatement(data, statement1, Logics);
+                            }
+                            Match(TokenType.ElseKeyword);
+                            statement2 = Stmt();
+                            return new ElseStatement(data, statement1, statement2);
                     }
 
                 case TokenType.WhileKeyword:
@@ -420,7 +407,8 @@ namespace Compiler.Parser {
                         statement1 = Stmt();
                         return new WhileStatement(data, statement1,Logics);
                     }
-                case TokenType.ForeachKeyword: {
+                case TokenType.ForeachKeyword: 
+                    {
                         Match(TokenType.ForeachKeyword);
                         Match(TokenType.LeftParens);
                         var result = lookAhead;

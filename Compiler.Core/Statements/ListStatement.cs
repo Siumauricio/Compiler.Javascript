@@ -16,7 +16,7 @@ namespace Compiler.Core.Statements
           
         }
 
-        public override string Generate(int tabs)
+        public override string Generate()
         {
 
             throw new NotImplementedException();
