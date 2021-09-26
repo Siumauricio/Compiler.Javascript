@@ -23,5 +23,13 @@
 
             return LeftExpression.Generate();
         }
+
+        public override string Generate2() {
+            if (RightExpression != null) {
+                return $"{LeftExpression.Generate()} , {RightExpression.Generate()}";
+            }
+
+            return LeftExpression.Generate();
+        }
     }
 }

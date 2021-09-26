@@ -47,7 +47,7 @@ namespace Compiler.Core.Statements
             {
                 code += $"{data.Id.Token.Lexeme}";
                 if (count < Expression.Count-1) {
-                    code += "+";
+                    code += ",";
                     count++;
                 }
             }

@@ -43,6 +43,14 @@ namespace Compiler.Core.Expressions
             return $"{LeftExpression.Generate()} {Token.Lexeme} {RightExpression.Generate()}";
         }
 
+        public override string Generate2() {
+            if (Token.TokenType == TokenType.Equal) {
+                return $"{LeftExpression.Generate()} == {RightExpression.Generate()}";
+            }
+
+            return $"{LeftExpression.Generate()} {Token.Lexeme} {RightExpression.Generate()}";
+        }
+
         public override Type GetExpressionType()
         {
             if (_typeRules.TryGetValue((LeftExpression.GetExpressionType(), RightExpression.GetExpressionType()), out var resultType))

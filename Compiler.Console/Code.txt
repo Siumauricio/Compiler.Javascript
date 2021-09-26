@@ -4,37 +4,25 @@ namespace std.s
 {
     class TestClass
     {
-      public int f2(int x,int x2,int x3){
+      public bool f2(int x,int x2){
 
-        return x + x2;
+        return x > x2 ;
+      }
+
+      public bool f3(int x1,int x4){
+        return x1 > x4 ;
       }
         
       static void main(string[] args)
 
         {
-         bool x=false;
-         int x3=25;
-         int f56=25;
-         List<int> data=new List<int>();
-            f2(25,25,x3+f56);
-          data.add(10);
-         if(x>65){
+         bool x90=f2(1,2) ;
+         if(x90 == 6){
+         Console.WriteLine(25+x90);
          }
-         bool f =false;
+         int x3=25+25+25+25+25;
+         Console.WriteLine(x3);
 
-         if(f>x3 && x3>10){
-         
-            if(f>7){
-            int gh=25;
-            }
-            int t;
-         }
-         bool j=true;
-         if(x>6){
-         if(x>6){
-         }
-         }
         }
-
     }
 }

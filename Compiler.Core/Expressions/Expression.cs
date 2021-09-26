@@ -13,5 +13,6 @@
         }
 
         public abstract string Generate();
+        public abstract string Generate2();
     }
 }

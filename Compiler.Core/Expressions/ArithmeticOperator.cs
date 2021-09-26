@@ -38,10 +38,19 @@ namespace Compiler.Core.Expressions
             if (LeftExpression.GetExpressionType() == Type.String &&
                 RightExpression.GetExpressionType() != Type.String)
             {
-                return $"{LeftExpression.Generate()} {Token.Lexeme} str({RightExpression.Generate()})";
+                return $"{LeftExpression.Generate()} , {RightExpression.Generate()})";
             }
 
-            return $"{LeftExpression.Generate()} {Token.Lexeme} {RightExpression.Generate()}";
+            return $"{LeftExpression.Generate()} + {RightExpression.Generate()}";
+        }
+
+        public override string Generate2() {
+            if (LeftExpression.GetExpressionType() == Type.String &&
+                RightExpression.GetExpressionType() != Type.String) {
+                return $"{LeftExpression.Generate2()} , {RightExpression.Generate2()})";
+            }
+
+            return $"{LeftExpression.Generate2()} , {RightExpression.Generate2()}";
         }
 
         public override Type GetExpressionType()

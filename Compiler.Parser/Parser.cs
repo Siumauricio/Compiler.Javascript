@@ -17,7 +17,7 @@ namespace Compiler.Parser {
         List<Statement> functions = new List<Statement>();
         Tuple<Token, TokenType,Id> tuple;
         List<Expression> expressions = new List<Expression>();
-
+        string paramsAssignment = "";
         public Parser(IScanner scanner) {
 
             this.scanner = scanner;
@@ -131,7 +131,6 @@ namespace Compiler.Parser {
             }
             buffer += bff;
             bff = ""+Environment.NewLine;
-            EnvironmentManager.PushContext();
         }
         private void GenerateCodeFunctionMain() {
             buffer += bff;
@@ -255,10 +254,13 @@ namespace Compiler.Parser {
             {
                 case TokenType.Identifier: 
                     {
+                        var varname = this.lookAhead;
                         string[] resultSplit;
                         bool isList = false;
                         if (lookAhead.Lexeme.Contains(".add") && lookAhead.Lexeme[lookAhead.Lexeme.Length - 1] == 'd') {
+                           
                             resultSplit = lookAhead.Lexeme.Split(".");
+                            bff += resultSplit[0]+".push(";
                             //  EnvironmentManager.GetSymbol(resultSplit[0]);
                             this.lookAhead.Lexeme = resultSplit[0];
                             isList = true;
@@ -267,16 +269,14 @@ namespace Compiler.Parser {
                         var variable = lookAhead;
                         Match(TokenType.Identifier);
                         if (lookAhead.TokenType == TokenType.LeftParens && isList) {
-                            // Match(TokenType.AddKeyword);
                             Match(TokenType.LeftParens);
                             var data = GetSymbolListByLexeme(variable.Lexeme);
-                            //  Match(TokenType.Identifier);
                             if (data == null) {////////////////////list
                                 throw new ApplicationException($"Syntax error! expected type variable list but found {variable}. Line: {variable.Line}, Column: {variable.Column}");
                             }
+                            bff += lookAhead.Lexeme + ");" + Environment.NewLine;
+
                             ValidateConstant(lookAhead, data.typeVariable);
-                            // var constant = new Constant(lookAhead, Type.Int);
-                            // Match(data.typeVariable);
                             Match(TokenType.RightParens);
                             Match(TokenType.SemiColon);
                             return new ListStatement();
@@ -317,7 +317,6 @@ namespace Compiler.Parser {
                                     } else {
                                         throw new ApplicationException($"Syntax error! Param Type Expected {Assign.Params[i].Id.GetExpressionType()} but Found {type}");
                                     }
-
                                 } else {
                                     bff += Assign.Attributes[i].Token.Lexeme;
                                 }
@@ -327,6 +326,7 @@ namespace Compiler.Parser {
 
                             }
                             bff += ");" + Environment.NewLine;
+                            expressions.Clear();
                             Decls();
                             return Assign;
                         } else {
@@ -349,22 +349,29 @@ namespace Compiler.Parser {
                         expression = Eq();
                         if (expression is RelationalExpression) {
                             RelationalExpression result = expression as RelationalExpression;
-                            bff += "if(" + result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme + "){" + Environment.NewLine;
+                            bff += "if(" + result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme;
                         }
                         data.Add(expression as TypedExpression);
                         for (int i = 0; i < data.Count; i++) {
                             if (lookAhead.TokenType == TokenType.AndOperator) {
+                                bff += " && ";
                                 Logics.Add(lookAhead);
                                 Match(TokenType.AndOperator);
                                 expression = Eq();
+                                RelationalExpression result = expression as RelationalExpression;
+                                bff += result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme;
                                 data.Add(expression as TypedExpression);
                             } else if (lookAhead.TokenType == TokenType.OrOperator) {
+                                bff += " || ";
                                 Logics.Add(lookAhead);
                                 Match(TokenType.OrOperator);
                                 expression = Eq();
+                                RelationalExpression result = expression as RelationalExpression;
+                                bff += result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme;
                                 data.Add(expression as TypedExpression);
                             }
                         }
+                            bff += "){" + Environment.NewLine;
                             Match(TokenType.RightParens);
 
                             statement1 = Stmt();
@@ -383,24 +390,36 @@ namespace Compiler.Parser {
                         List<TypedExpression> data = new List<TypedExpression>();
                         List<Token> Logics = new List<Token>();
                         expression = Eq();
+                        if (expression is RelationalExpression) {
+                            RelationalExpression result = expression as RelationalExpression;
+                            bff += "while(" + result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme;
+                        }
+
                         data.Add(expression as TypedExpression);
                         for (int i = 0; i < data.Count; i++)
                         {
                             if (lookAhead.TokenType == TokenType.AndOperator)
                             {
+                                bff += " && ";
                                 Logics.Add(lookAhead);
                                 Match(TokenType.AndOperator);
                                 expression = Eq();
+                                RelationalExpression result = expression as RelationalExpression;
+                                bff += result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme;
                                 data.Add(expression as TypedExpression);
                             }
                             else if (lookAhead.TokenType == TokenType.OrOperator)
                             {
+                                bff += " || ";
                                 Logics.Add(lookAhead);
                                 Match(TokenType.OrOperator);
                                 expression = Eq();
+                                RelationalExpression result = expression as RelationalExpression;
+                                bff += result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme;
                                 data.Add(expression as TypedExpression);
                             }
                         }
+                        bff += "){" + Environment.NewLine;
                         Match(TokenType.RightParens);
                         statement1 = Stmt();
                         return new WhileStatement(data, statement1,Logics);
@@ -409,44 +428,43 @@ namespace Compiler.Parser {
                     {
                         Match(TokenType.ForeachKeyword);
                         Match(TokenType.LeftParens);
+
                         var result = lookAhead;
+
                         verifyType(lookAhead);
+                        var variable = lookAhead;
+                      
                         Match(TokenType.Identifier);
                         Match(TokenType.InKeyword);
                         var variableList = lookAhead;
                         var variableExists = EnvironmentManager.GetSymbol(variableList.Lexeme);
                         MatchVariableType(result.TokenType, lookAhead);
                         Match(TokenType.RightParens);
+                        bff += variableList.Lexeme+ ".forEach( (" + variable.Lexeme + ") => {"+Environment.NewLine;
                         statement1 = Stmt();
+                        bff = bff.Substring(0, bff.Length - 2);
+                        bff += ");"+Environment.NewLine;
+
                         return new ForEachStatement(result, variableList, statement1);
-                        //FALTA RETORNAR UNA CLASE TIPO FOREACH
-                        //return Block();
                     }
                 case TokenType.WriteLineKeyword:
                     Match(TokenType.WriteLineKeyword);
+                    bff += "console.log(";
+
                     Match(TokenType.LeftParens);
                     var isIdentifier = lookAhead;
                     var dataVariable = new List<Symbol>();
-                    if (isIdentifier.TokenType == TokenType.Identifier)
+                    if (isIdentifier.TokenType == TokenType.Identifier || isIdentifier.TokenType == TokenType.IntConstant || isIdentifier.TokenType == TokenType.StringConstant || isIdentifier.TokenType == TokenType.FloatConstant || isIdentifier.TokenType == TokenType.BoolConstant)
                     {
-                        var symbolToPrint = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
-                     
-                        Match(TokenType.Identifier);
-                        dataVariable.Add(symbolToPrint);
-                        for (int i = 0; i < dataVariable.Count; i++)
-                        {
-                            if (lookAhead.TokenType == TokenType.Plus)
-                            {
-                                Match(TokenType.Plus);
-                                symbolToPrint = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
-                                Match(TokenType.Identifier);
-                                dataVariable.Add(symbolToPrint);
-                            }
-                        }
+                        var symbolToPrint = Eq();
+                        bff += symbolToPrint.Generate2();
+                        bff += ");"+Environment.NewLine;
                         Match(TokenType.RightParens);
                         Match(TokenType.SemiColon);
+                        Decls();
+
                         return new WriteLineStatement(dataVariable);
-                    }
+                    } 
                     Match(TokenType.RightParens);
                     Match(TokenType.SemiColon);
                     return new WriteLineStatement();
@@ -457,10 +475,12 @@ namespace Compiler.Parser {
                     Match(TokenType.SemiColon);
                     return new ReadLineStatement();
                 case TokenType.ReturnKeyword:
+                    List<RelationalExpression> data2 = new List<RelationalExpression>();
                     Match(TokenType.ReturnKeyword);
                     if (this.lookAhead.TokenType != TokenType.SemiColon) {
                         expression = Eq();
                     }
+                    
                     bff += "return ";
                     if (tuple.Item2 == TokenType.VoidKeyword) {
                         if (expression !=null) {
@@ -470,11 +490,35 @@ namespace Compiler.Parser {
                     }
                     else if (expression is ArithmeticOperator && (tuple.Item2 == TokenType.IntKeyword || tuple.Item2 == TokenType.FloatKeyword) ) {
                         ArithmeticOperator arithmeticOperator = (ArithmeticOperator)expression ;
-                        bff += arithmeticOperator.LeftExpression.Token.Lexeme + " "+arithmeticOperator.Token.Lexeme +" "+ arithmeticOperator.RightExpression.Token.Lexeme+";" + Environment.NewLine;
+                        bff += arithmeticOperator.Generate()+";" + Environment.NewLine;
                     }
                     else if(expression is RelationalExpression && (tuple.Item2 == TokenType.BoolKeyword)) {
                         RelationalExpression relational = (RelationalExpression)expression;
-                        bff += relational.LeftExpression.Token.Lexeme + " " + relational.Token.Lexeme + " " + relational.RightExpression.Token.Lexeme + ";" + Environment.NewLine;
+                        relational.GetExpressionType();
+                        bff += relational.LeftExpression.Token.Lexeme + " " + relational.Token.Lexeme + " " + relational.RightExpression.Token.Lexeme ;
+                        data2.Add(expression as RelationalExpression);
+                        for (int i = 0; i < data2.Count; i++) {
+                            if (lookAhead.TokenType == TokenType.AndOperator) {
+                                bff += " && ";
+                                Match(TokenType.AndOperator);
+                                expression = Eq();
+                                RelationalExpression result = expression as RelationalExpression;
+                                result.GetExpressionType();
+
+                                bff += result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme;
+                                data2.Add(expression as RelationalExpression);
+                            } else if (lookAhead.TokenType == TokenType.OrOperator) {
+                                bff += " || ";
+                                Match(TokenType.OrOperator);
+                                expression = Eq();
+                                RelationalExpression result = expression as RelationalExpression;
+                                bff += result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme;
+                                data2.Add(expression as RelationalExpression);
+                            }
+                        }
+                        bff += ";"+Environment.NewLine;
+
+                        
                     }
                     else if(expression!=null ) {
                         if (expression.GetType() == typeof(Id)) {
@@ -483,6 +527,8 @@ namespace Compiler.Parser {
                             } else {
                                 throw new ApplicationException($"Syntax error! expected return type {tuple.Item3.type} but found {expression.type}.");
                             }
+                        } else {
+                            throw new ApplicationException($"Syntax error! Return Invalid!");
                         }
                     } else {
                         throw new ApplicationException($"Syntax error! expected return type {tuple.Item3.type} but found another");
@@ -502,28 +548,40 @@ namespace Compiler.Parser {
 
             if (token.TokenType == TokenType.IntKeyword)
             {
+                
                 Match(TokenType.IntKeyword);
+                var @var = this.lookAhead;
+                Id id = new Id(@var, Type.Int);
+                EnvironmentManager.AddVariable(@var.Lexeme, id);
                 return;
             }
             else if (token.TokenType == TokenType.DateTimeKeyword)
             {
                 Match(TokenType.DateTimeKeyword);
+                var @var = this.lookAhead;
+                Id id = new Id(@var, Type.DateTime);
+                EnvironmentManager.AddVariable(@var.Lexeme, id);
                 return;
             }
             else if (token.TokenType == TokenType.BoolKeyword)
             {
                 Match(TokenType.BoolKeyword);
+                var @var = this.lookAhead;
+                Id id = new Id(@var, Type.Bool);
+                EnvironmentManager.AddVariable(@var.Lexeme, id);
                 return;
             }
             else if (token.TokenType == TokenType.FloatKeyword)
             {
                 Match(TokenType.FloatKeyword);
+                var @var = this.lookAhead;
+                Id id = new Id(@var, Type.Float);
+                EnvironmentManager.AddVariable(@var.Lexeme, id);
                 return;
             }
             else {
                 throw new ApplicationException($"Syntax error! expected variable but found {token.TokenType}. Line: {token.Line}, Column: {token.Column}");
             }
-
         }
 
         private Expression Eq()
@@ -607,6 +665,46 @@ namespace Compiler.Parser {
                 default:
                     var symbol = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
                     Match(TokenType.Identifier);
+
+                    if (symbol.SymbolType == SymbolType.Method) {
+                        var Assign = GetFunctionStmt(symbol) as ParamsValueFunction;
+
+                        paramsAssignment += Assign.Id.Token.Lexeme + " (";
+                        if (Assign.Params.Count != Assign.Attributes.Count) {
+                            throw new ApplicationException($"Syntax error! Function {Assign.Id.Token.Lexeme} Accept {Assign.Params.Count} parameters and you send {Assign.Attributes.Count} parameters");
+
+                        }
+                        for (int i = 0; i < Assign.Params.Count; i++) {
+                            Type tipo = Assign.Attributes[i].type;
+
+                            if ((Assign.Params[i].Id.GetExpressionType() != Assign.Attributes[i].type) && tipo?.GetType() != null) {
+                                throw new ApplicationException($"Syntax error! Param Type Expected {Assign.Params[i].Id.GetExpressionType()} but Found {Assign.Attributes[i].type}");
+                            } else if (Assign.Attributes[i] is ArithmeticOperator) {
+                                var convert = Assign.Attributes[i] as ArithmeticOperator;
+                                var type = convert.GetExpressionType();
+                                if (type == Assign.Params[i].Id.GetExpressionType()) {
+                                    paramsAssignment += convert.Generate();
+                                } else {
+                                    throw new ApplicationException($"Syntax error! Param Type Expected {Assign.Params[i].Id.GetExpressionType()} but Found {type}");
+                                }
+                            } else {
+                                paramsAssignment += Assign.Attributes[i].Token.Lexeme;
+                            }
+                            if ((i + 1) != Assign.Params.Count) {
+                                paramsAssignment += ",";
+                            }
+
+                        }
+                        paramsAssignment += ")";
+                        var isSum = this.lookAhead;
+
+                        if (isSum.TokenType == TokenType.Plus) {
+                            paramsAssignment += "+";
+                        } else {
+                            paramsAssignment += ";";
+                        }
+                    }
+                    expressions.Clear();
                     return symbol.Id;
             }
         }
@@ -615,7 +713,6 @@ namespace Compiler.Parser {
             Match(TokenType.LeftParens);
             var @params = OptParams2();
             Match(TokenType.RightParens);
-            Match(TokenType.SemiColon);
             return new ParamsValueFunction(symbol.Id,symbol.Parameters ,expressions);
         }
         private Expression OptParams2() {
@@ -692,7 +789,13 @@ namespace Compiler.Parser {
                         id = new Id(token, Type.Float);
                         var assignation = AssignStmt(id) as AssignationStatement;
                         assignation.ValidateSemantic();
-                        bff += "let " + token.Lexeme + " = " + assignation.Expression.Token.Lexeme + ";" + Environment.NewLine;
+
+                        if (paramsAssignment == "") {
+                            bff += "let " + assignation.Generate() + Environment.NewLine;
+                        } else {
+                            bff += "let " + token.Lexeme + " = " + paramsAssignment + Environment.NewLine;
+
+                        }
                         EnvironmentManager.AddVariableWithValue(token.Lexeme, id, assignation.Expression.Token.Lexeme);
                         break;
                     }
@@ -720,8 +823,12 @@ namespace Compiler.Parser {
                         id = new Id(token, Type.Int);
                         var assignation = AssignStmt(id) as AssignationStatement;
                         assignation.ValidateSemantic();
-                        //s =5+5+4+32+5+6+&
-                        bff += "let " + token.Lexeme + " = "+ assignation.Expression.Token.Lexeme+";" + Environment.NewLine;
+                        if (paramsAssignment == "") {
+                            bff += "let " + assignation.Generate() + Environment.NewLine;
+                        } else {
+                            bff += "let " + token.Lexeme + " = " + paramsAssignment + Environment.NewLine;
+
+                        }
 
                         EnvironmentManager.AddVariableWithValue(token.Lexeme, id, assignation.Expression.Token.Lexeme);
                         break;
@@ -739,8 +846,15 @@ namespace Compiler.Parser {
                     if (isInitialize.TokenType == TokenType.Assignation) {
                         id = new Id(token, Type.DateTime);
                         var assignation = AssignStmt(id) as AssignationStatement;
+
                         assignation.ValidateSemantic();
-                        bff += "let " + token.Lexeme + " = " + assignation.Expression.Token.Lexeme + ";" + Environment.NewLine;
+
+                        if (paramsAssignment == "") {
+                            bff += "let " + assignation.Generate() + Environment.NewLine;
+                        } else {
+                            bff += "let " + token.Lexeme + " = " + paramsAssignment + Environment.NewLine;
+
+                        }
                         EnvironmentManager.AddVariableWithValue(token.Lexeme, id, assignation.Expression.Token.Lexeme);
                         break;
                     }
@@ -758,8 +872,13 @@ namespace Compiler.Parser {
                         id = new Id(token, Type.Bool);
                         var assignation = AssignStmt(id) as AssignationStatement;
                         assignation.ValidateSemantic();
-                        bff += "let " + token.Lexeme + " = " + assignation.Expression.Token.Lexeme + ";" + Environment.NewLine;
 
+                        if (paramsAssignment == "") {
+                            bff += "let " + assignation.Generate() + Environment.NewLine;
+                        } else {
+                            bff += "let " + token.Lexeme + " = " + paramsAssignment + Environment.NewLine;
+
+                        }
                         EnvironmentManager.AddVariableWithValue(token.Lexeme, id, assignation.Expression.Token.Lexeme);
                         break;
                     }
@@ -796,6 +915,7 @@ namespace Compiler.Parser {
                 default:
                     break;
             }
+            paramsAssignment = "";
         }
 
 
@@ -804,6 +924,8 @@ namespace Compiler.Parser {
             Match(tokenType);
             Match(TokenType.GreaterThan);
             var token = lookAhead;
+            bff += "const " + token.Lexeme + " = [];"+Environment.NewLine;
+
             Match(TokenType.Identifier);
             Match(TokenType.Assignation);
             Match(TokenType.NewKeyword);
@@ -854,5 +976,8 @@ namespace Compiler.Parser {
             }
             this.Move();
         }
+
+
+
     }
 }
