@@ -15,10 +15,10 @@ namespace Compiler.Core.Statements
         public Id Id { get; }
         public TypedExpression Expression { get; }
 
-        public override string Generate(int tabs)
+        public override string Generate()
         {
-            var code = GetCodeInit(tabs);
-            code += $"{Id.Generate()} = {Expression.Generate()}{Environment.NewLine}";
+            var code = GetCodeInit();
+            code += $"{Id.Generate()} = {Expression.Generate()};"+Environment.NewLine;
             return code;
         }
 

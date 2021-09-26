@@ -18,7 +18,7 @@ namespace Compiler.Core.Statements
         public Statement TrueStatement { get; }
         public Statement FalseStatement { get; }
 
-        public override string Generate(int tabs)
+        public override string Generate()
         {
             var code = GetCodeInit(tabs);
             code += $"if(";

@@ -39,8 +39,7 @@ namespace Compiler.Core.Statements
 
         }
 
-
-        public override string Generate(int tabs)
+        public override string Generate()
         {
             int count = 0;
             var code = "console.log(";

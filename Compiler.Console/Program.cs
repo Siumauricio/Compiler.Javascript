@@ -5,11 +5,9 @@ using System.IO;
 
 namespace Compiler.Console
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            var code = File.ReadAllText("Code.txt").Replace(Environment.NewLine, "\n");
+    class Program {
+        static void Main(string[] args) {
+            var code = File.ReadAllText("D:\\GitHub\\Compiler.Javascript\\Compiler.Console\\Code.txt").Replace(Environment.NewLine, "\n");
             var input = new Input(code);
             var scanner = new Scanner(input);
             //while (true)
@@ -33,3 +31,13 @@ namespace Compiler.Console
 
     }
 }
+
+//    while (true) {
+//        var token = scanner.GetNextToken();
+//        System.Console.WriteLine(token.ToString());
+//        if (token.Lexeme == "\0") {
+//            System.Console.WriteLine("TODOS LOS TOKENS INGRESADOS SON VALIDOzsssS1");
+//            break;
+//        }
+//    }
+//}

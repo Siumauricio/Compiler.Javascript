@@ -66,6 +66,7 @@ namespace Compiler.Core
         ListKeyword,
         NewKeyword,
         AddKeyword,
+        ReturnKeyword
 
     }
 }

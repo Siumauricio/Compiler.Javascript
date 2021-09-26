@@ -1,20 +1,17 @@
-﻿using Compiler.Core;
+using Compiler.Core;
 using Compiler.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Compiler.Lexer
-{
-    public class Scanner : IScanner
-    {
+namespace Compiler.Lexer {
+    public class Scanner : IScanner {
         private Input input;
         private readonly Dictionary<string, TokenType> keywords;
         private readonly Dictionary<string, TokenType> Tokens;
         private readonly Dictionary<string, TokenType> Rep;
 
-        public Scanner(Input input)
-        {
+        public Scanner(Input input) {
             this.input = input;
             this.keywords = new Dictionary<string, TokenType>
             {
@@ -29,7 +26,7 @@ namespace Compiler.Lexer
                 { "Console.WriteLine" ,TokenType.WriteLineKeyword},
                 { "Console.ReadLine" ,TokenType.ReadLineKeyword},
                 { "namespace" ,TokenType.NamespaceKeyword},
-                { "Main" ,TokenType.MainKeyword},
+                { "main" ,TokenType.MainKeyword},
                 { "void" ,TokenType.VoidKeyword},
                 { "static" ,TokenType.StaticKeyword},
                 { "string" ,TokenType.StringKeyword},
@@ -44,6 +41,7 @@ namespace Compiler.Lexer
                 {"new", TokenType.NewKeyword },
                 {".add", TokenType.AddKeyword }
 
+                {"return", TokenType.ReturnKeyword },
             };
 
             this.Tokens = new Dictionary<string, TokenType>
@@ -88,22 +86,17 @@ namespace Compiler.Lexer
             };
         }
 
-        public Token GetNextToken()
-        {
+        public Token GetNextToken() {
             var lexeme = new StringBuilder();
             var currentChar = GetNextChar();
-            while (true)
-            {
-                while (char.IsWhiteSpace(currentChar) || currentChar == '\n')
-                {
+            while (true) {
+                while (char.IsWhiteSpace(currentChar) || currentChar == '\n') {
                     currentChar = GetNextChar();
                 }
-                if (char.IsLetter(currentChar))
-                {
+                if (char.IsLetter(currentChar)) {
                     lexeme.Append(currentChar);
                     currentChar = PeekNextChar();
-                    while (char.IsLetterOrDigit(currentChar) || currentChar == '.')
-                    {
+                    while (char.IsLetterOrDigit(currentChar) || currentChar == '.') {
                         currentChar = GetNextChar();
                         lexeme.Append(currentChar);
                         currentChar = PeekNextChar();
@@ -116,50 +109,39 @@ namespace Compiler.Lexer
                         return GetInfo(this.keywords[lexeme.ToString()], input.Position.Column, input.Position.Line, lexeme.ToString());
                     }
                     return GetInfo(TokenType.Identifier, input.Position.Column, input.Position.Line, lexeme.ToString());
-                }
-                else if (char.IsDigit(currentChar))
-                {
+                } else if (char.IsDigit(currentChar)) {
                     lexeme.Append(currentChar);
                     currentChar = PeekNextChar();
-                    while (char.IsDigit(currentChar))
-                    {
+                    while (char.IsDigit(currentChar)) {
                         currentChar = GetNextChar();
                         lexeme.Append(currentChar);
                         currentChar = PeekNextChar();
                     }
 
-                    if (currentChar != '.')
-                    {
+                    if (currentChar != '.') {
                         return GetInfo(TokenType.IntConstant, input.Position.Column, input.Position.Line, lexeme.ToString());
                     }
 
                     currentChar = GetNextChar();
                     lexeme.Append(currentChar);
+
                     currentChar = PeekNextChar();
-                    while (char.IsDigit(currentChar))
-                    {
+                    while (char.IsDigit(currentChar)) {
                         currentChar = GetNextChar();
                         lexeme.Append(currentChar);
                         currentChar = PeekNextChar();
                     }
                     return GetInfo(TokenType.FloatConstant, input.Position.Column, input.Position.Line, lexeme.ToString());
-                }
-                else
-                {
-                    if (this.Tokens.ContainsKey(currentChar.ToString()))
-                    {
+                } else {
+                    if (this.Tokens.ContainsKey(currentChar.ToString())) {
                         lexeme.Append(currentChar);
                         var nextChar = PeekNextChar();
-                        if (!this.Rep.ContainsKey(nextChar.ToString()))
-                        {
+                        if (!this.Rep.ContainsKey(nextChar.ToString())) {
                             return GetInfo(this.Tokens[currentChar.ToString()], input.Position.Column, input.Position.Line, lexeme.ToString().Trim());
-                        }
-                        else
-                        {
+                        } else {
                             lexeme.Append(nextChar);
                             GetNextChar();
-                            if (this.Tokens.ContainsKey(lexeme.ToString()))
-                            {
+                            if (this.Tokens.ContainsKey(lexeme.ToString())) {
                                 return GetInfo(this.Tokens[lexeme.ToString().Trim()], input.Position.Column, input.Position.Line, lexeme.ToString().Trim());
                             }
                         }
@@ -169,24 +151,20 @@ namespace Compiler.Lexer
                 }
             }
         }
-        private Token GetInfo(TokenType tokenType, int column, int line, string lexeme)
-        {
-            return new Token
-            {
+        private Token GetInfo(TokenType tokenType, int column, int line, string lexeme) {
+            return new Token {
                 TokenType = tokenType,
                 Column = column,
                 Line = line,
                 Lexeme = lexeme
             };
         }
-        private char GetNextChar()
-        {
+        private char GetNextChar() {
             var next = input.NextChar();
             input = next.Reminder;
             return next.Value;
         }
-        private char PeekNextChar()
-        {
+        private char PeekNextChar() {
             var next = input.NextChar();
             return next.Value;
         }

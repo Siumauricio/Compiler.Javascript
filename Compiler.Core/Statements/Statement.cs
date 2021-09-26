@@ -8,15 +8,13 @@ namespace Compiler.Core.Statements
 
         public abstract void ValidateSemantic();
 
-        public abstract string Generate(int tabs);
+        public abstract string Generate();
 
-        public virtual string GetCodeInit(int tabs)
+        public virtual string GetCodeInit()
         {
+
             var code = string.Empty;
-            for (int i = 0; i < tabs; i++)
-            {
-                code += "\t";
-            }
+   
             return code;
         }
     }

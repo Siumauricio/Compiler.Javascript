@@ -69,9 +69,9 @@ namespace Compiler.Core.Statements
 
         }
 
-        public override string Generate(int tabs)
+        public override string Generate()
         {
-            var code = GetCodeInit(tabs);
+            var code = GetCodeInit();
             var innerCode = InnerCodeGenerateCode(Arguments);
             code += $"{Id.Generate()}({innerCode}){Environment.NewLine}";
             return code;

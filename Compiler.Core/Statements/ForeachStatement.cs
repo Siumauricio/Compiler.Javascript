@@ -31,7 +31,7 @@ namespace Compiler.Core.Statements
             throw new NotImplementedException();
         }
 
-        public override string Generate(int tabs)
+        public override string Generate()
         {
             var code = $"{Token2.Lexeme}.foreach(";
             code += $"function({Token1.Lexeme})";
