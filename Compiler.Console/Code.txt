@@ -12,26 +12,25 @@ namespace std.s
       static void main(string[] args)
 
         {
-         bool x=false;
+         bool x=false+false;
+
          int x3=25;
          int f56=25;
+         int eo=x3%f56+20+20;
+   
          List<int> data=new List<int>();
             f2(25,25,x3+f56);
-          data.add(10);
-         if(x>65){
-         }
-         bool f =false;
-
-         if(f>x3 && x3>10){
-         
-            if(f>7){
-            int gh=25;
-            }
+          data.Add(10);
+    while(x3%2==10 && x==true){
+    
+    }
+         if(x3==f56){
+        
             int t;
          }
          bool j=true;
-         if(x>6){
-         if(x>6){
+         if(x==true){
+         if(x==true){
          }
          }
         }
