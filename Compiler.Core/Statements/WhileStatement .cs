@@ -15,9 +15,16 @@ namespace Compiler.Core.Statements
         public TypedExpression Expression { get; }
         public Statement Statement { get; }
 
-        public override string Generate(int tabs)
+        public override string Generate()
         {
-            throw new NotImplementedException();
+
+            var code = GetCodeInit();
+            code += $"while({Expression.Generate()})";
+            code += "{";
+            code += $"{Environment.NewLine}";
+            code += $"{Statement?.Generate()}{Environment.NewLine}";
+            code += "}";
+            return code;
         }
 
         public override void Interpret()

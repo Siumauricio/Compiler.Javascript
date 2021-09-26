@@ -17,17 +17,13 @@ namespace Compiler.Core.Statements
         public Statement TrueStatement { get; }
         public Statement FalseStatement { get; }
 
-        public override string Generate(int tabs)
+        public override string Generate()
         {
-            var code = GetCodeInit(tabs);
+            var code = GetCodeInit();
             code += $"if({Expression.Generate()}):{Environment.NewLine}";
-            code += $"{TrueStatement.Generate(tabs + 1)}{Environment.NewLine}";
-            for (int i = 0; i < tabs; i++)
-            {
-                code += "\t";
-            }
+            code += $"{TrueStatement.Generate()}{Environment.NewLine}";
             code += $"else:{Environment.NewLine}";
-            code += $"{FalseStatement.Generate(tabs + 1)}{Environment.NewLine}";
+            code += $"{FalseStatement.Generate()}{Environment.NewLine}";
             return code;
         }
 

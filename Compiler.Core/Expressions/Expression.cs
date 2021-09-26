@@ -2,7 +2,7 @@
 {
     public abstract class Expression : Node
     {
-        protected readonly Type type;
+        public readonly Type type;
 
         public Token Token { get; }
 

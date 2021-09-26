@@ -36,6 +36,7 @@ namespace Compiler.Core
                 var symbol = context.Get(lexeme);
                 if (symbol != null)
                 {
+                    
                     return symbol;
                 }
             }
@@ -57,7 +58,9 @@ namespace Compiler.Core
 
         public static void AddMethod(string lexeme, Id id, BinaryOperator arguments) =>
             _contexts.Last().AddMethod(lexeme, id, arguments);
-
+        public static void AddMethod2(string lexeme, Id id, List<FunctionParamsStatement> parameters) =>
+          _contexts.Last().AddMethod2(lexeme, id, parameters);
+        
         public static void AddVariable(string lexeme, Id id) => _contexts.Last().AddVariable(lexeme, id);
         public static void AddVariableWithValue(string lexeme, Id id, dynamic value) => _contexts.Last().AddVariableWithValue(lexeme, id, value);
         public static void AddLibrary(string lexeme, Id id) => _contexts.Last().AddLibrary(lexeme, id);
@@ -85,7 +88,7 @@ namespace Compiler.Core
 
             public void AddVariable(string lexeme, Id id)
             {
-                if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Variable, id, null)))
+                if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Variable, id, 0)))
                 {
                     throw new ApplicationException($"Variable {lexeme} already defined in current context");
                 }
@@ -100,7 +103,7 @@ namespace Compiler.Core
 
             public void AddLibrary(string lexeme, Id id)
             {
-                if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Library, id, null)))
+                if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Library, id, 0)))
                 {
                     throw new ApplicationException($"Library {lexeme} already defined in current context");
                 }
@@ -121,6 +124,11 @@ namespace Compiler.Core
                 }
             }
 
+            public void AddMethod2(string lexeme, Id id,List<FunctionParamsStatement> parameters ) {
+                if (!_table.TryAdd(lexeme, new Symbol(SymbolType.Method, id, parameters))) {
+                    throw new ApplicationException($"Method {lexeme} already defined in current context");
+                }
+            }
             public Symbol Get(string lexeme)
             {
                 if (_table.TryGetValue(lexeme, out var found))

@@ -32,7 +32,7 @@ namespace Compiler.Core.Statements
             throw new NotImplementedException();
         }
 
-        public override string Generate(int tabs)
+        public override string Generate()
         {
             throw new NotImplementedException();
         }

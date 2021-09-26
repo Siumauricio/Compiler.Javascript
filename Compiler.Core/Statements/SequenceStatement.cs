@@ -24,10 +24,10 @@
             NextStatement?.Interpret();
         }
 
-        public override string Generate(int tabs)
+        public override string Generate()
         {
-            var code = FirstStatement?.Generate(tabs);
-            code += NextStatement?.Generate(tabs);
+            var code = FirstStatement?.Generate();
+            code += NextStatement?.Generate();
             return code;
         }
     }

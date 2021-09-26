@@ -1,31 +1,38 @@
-﻿using System;
+using System;
 using Compiler.Core;
 namespace std.s
 {
     class TestClass
     {
-      public DateTime f2(){
+      public int f2(int x,int x2,int x3){
 
+        return x + x2;
       }
         
-      static void Main(string[] args)
+      static void main(string[] args)
 
         {
-            
-           bool x=false;
+         bool x=false;
+         int x3=25;
+         int f56=25;
+            f2(25,25,x3+f566);
+          
          if(x>65){
          }
          bool f =false;
 
          if(f>5){
          
-            while(f>7){
+            if(f>7){
             int gh=25;
             }
             int t;
          }
          bool j=true;
-
+         if(x>6){
+         if(x>6){
+         }
+         }
         }
 
     }
