@@ -16,6 +16,7 @@ namespace Compiler.Core.Expressions
                 TokenType.IntConstant => Convert.ToInt32(Token.Lexeme),
                 TokenType.FloatConstant => float.Parse(Token.Lexeme),
                 TokenType.StringConstant => Token.Lexeme,
+            //    TokenType.BoolConstant=>Token.
                 _ => throw new NotImplementedException()
             };
         }

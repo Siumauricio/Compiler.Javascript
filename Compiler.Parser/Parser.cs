@@ -12,6 +12,8 @@ namespace Compiler.Parser {
         private readonly IScanner scanner;
         private Token lookAhead;
         private List<SymbolList> lst =new List<SymbolList>();
+        private List<Token> lstBooleans = new List<Token>();
+        private List<Token> lstIntFloats = new List<Token>();
         string buffer = "";
         string bff = "";
         List<Statement> functions = new List<Statement>();
@@ -257,8 +259,7 @@ namespace Compiler.Parser {
                         var varname = this.lookAhead;
                         string[] resultSplit;
                         bool isList = false;
-                        if (lookAhead.Lexeme.Contains(".add") && lookAhead.Lexeme[lookAhead.Lexeme.Length - 1] == 'd') {
-                           
+                        if (lookAhead.Lexeme.Contains(".Add") && lookAhead.Lexeme[lookAhead.Lexeme.Length - 1] == 'd') {
                             resultSplit = lookAhead.Lexeme.Split(".");
                             bff += resultSplit[0]+".push(";
                             //  EnvironmentManager.GetSymbol(resultSplit[0]);
@@ -348,10 +349,30 @@ namespace Compiler.Parser {
                         List<Token> Logics = new List<Token>();
                         expression = Eq();
                         if (expression is RelationalExpression) {
+                            var validateRelationalExpression = expression as TypedExpression;
+                            validateRelationalExpression.GetExpressionType();
                             RelationalExpression result = expression as RelationalExpression;
                             bff += "if(" + result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme;
                         }
                         data.Add(expression as TypedExpression);
+                        //////////////
+                        if (lookAhead.TokenType == TokenType.Percentaje) {
+                            Match(TokenType.Percentaje);
+                            if (lookAhead.TokenType == TokenType.Identifier)
+                            {
+                                var symbol = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
+                                var resultFind = GetIntFloatsVariable(lookAhead.Lexeme);
+                                if (resultFind == null) {
+                                    throw new ApplicationException($"Syntax error! Expected variable type int or float but found  variable {lookAhead.Lexeme}");
+                                }
+                                Match(TokenType.Identifier);
+                            }
+                            else if (lookAhead.TokenType == TokenType.IntConstant)
+                            {
+                                Match(TokenType.IntConstant);
+                            }
+                        }
+                        ///////////////
                         for (int i = 0; i < data.Count; i++) {
                             if (lookAhead.TokenType == TokenType.AndOperator) {
                                 bff += " && ";
@@ -391,11 +412,33 @@ namespace Compiler.Parser {
                         List<Token> Logics = new List<Token>();
                         expression = Eq();
                         if (expression is RelationalExpression) {
+                           //  var validateRelationalExpression = expression as TypedExpression;
+                         //   validateRelationalExpression.GetExpressionType();
                             RelationalExpression result = expression as RelationalExpression;
                             bff += "while(" + result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme;
                         }
 
                         data.Add(expression as TypedExpression);
+                        if (lookAhead.TokenType == TokenType.Percentaje)
+                        {
+                            Match(TokenType.Percentaje);
+                            if (lookAhead.TokenType == TokenType.Identifier)
+                            {
+                                var symbol = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
+                                var resultFind = GetIntFloatsVariable(lookAhead.Lexeme);
+                                if (resultFind == null)
+                                {
+                                    throw new ApplicationException($"Syntax error! Expected variable type int or float but found  variable {lookAhead.Lexeme}");
+                                }
+                                Match(TokenType.Identifier);
+                            }
+                            else if (lookAhead.TokenType == TokenType.IntConstant)
+                            {
+                                Match(TokenType.IntConstant);
+                            }
+                        }
+                        ///////////////
+
                         for (int i = 0; i < data.Count; i++)
                         {
                             if (lookAhead.TokenType == TokenType.AndOperator)
@@ -592,23 +635,33 @@ namespace Compiler.Parser {
                 Move();
                 expression = new RelationalExpression(token, expression as TypedExpression, Rel() as TypedExpression);
             }
-
+            
             return expression;
         }
+
 
         private Expression Rel() {
 
             var expression = Expr();
+            var variable = expression.Token;
+            if (GetBoolVariable(variable.Lexeme) != null) {
+                if (lookAhead.Lexeme == ">" || lookAhead.Lexeme == "<"
+                    || lookAhead.Lexeme == ">=" || lookAhead.Lexeme == "<=") {
+                    throw new ApplicationException($"Syntax error! operator {lookAhead.Lexeme} cannot be applied o operands of type bool . Line: {variable.Line}, Column: {variable.Column}");
+                }
+            }
+
             if (this.lookAhead.TokenType == TokenType.LessThan
                 || this.lookAhead.TokenType == TokenType.GreaterThan
                 || this.lookAhead.TokenType == TokenType.LessOrEqualThan
                 || this.lookAhead.TokenType == TokenType.GreaterOrEqualThan) {
-                var token = lookAhead;
+                var token = lookAhead;//el operador
                 Move();
                 expression = new RelationalExpression(token, expression as TypedExpression, Expr() as TypedExpression);
             }
             return expression;
         }
+
 
         private Expression Expr() {
             var expression = Term();
@@ -622,13 +675,15 @@ namespace Compiler.Parser {
 
         private Expression Term() {
             var expression = Factor();
-            while (this.lookAhead.TokenType == TokenType.Asterisk || this.lookAhead.TokenType == TokenType.Division) {
+            while (this.lookAhead.TokenType == TokenType.Asterisk || this.lookAhead.TokenType == TokenType.Division || this.lookAhead.TokenType==TokenType.Percentaje) {
                 var token = lookAhead;
                 Move();
                 expression = new ArithmeticOperator(token, expression as TypedExpression, Factor() as TypedExpression);
             }
             return expression;
         }
+
+
 
         private Expression Factor() {
             switch (this.lookAhead.TokenType) {
@@ -782,6 +837,7 @@ namespace Compiler.Parser {
                 case TokenType.FloatKeyword:
                     Match(TokenType.FloatKeyword);
                     var token = lookAhead;
+                    this.lstIntFloats.Add(token);
                     Match(TokenType.Identifier);
                     var isInitialize = lookAhead;
 
@@ -815,6 +871,7 @@ namespace Compiler.Parser {
                 case TokenType.IntKeyword:
                     Match(TokenType.IntKeyword);
                     token = lookAhead;
+                    this.lstIntFloats.Add(token);
                     Match(TokenType.Identifier);
                     isInitialize = lookAhead;
 
@@ -866,6 +923,7 @@ namespace Compiler.Parser {
                 case TokenType.BoolKeyword:
                     Match(TokenType.BoolKeyword);
                     token = lookAhead;
+                    lstBooleans.Add(token);
                     Match(TokenType.Identifier);
                     isInitialize = lookAhead;
                     if (isInitialize.TokenType == TokenType.Assignation) {
@@ -965,6 +1023,16 @@ namespace Compiler.Parser {
         private SymbolList GetSymbolListByLexeme(string lexeme) {
 
             return this.lst.Find(x => x.lexeme == lexeme);
+        }
+
+        private Token GetBoolVariable(string lexeme) {
+            return this.lstBooleans.Find(x => x.Lexeme == lexeme);
+        }
+
+
+        private Token GetIntFloatsVariable(string lexeme)
+        {
+            return this.lstIntFloats.Find(x => x.Lexeme == lexeme);
         }
 
 
