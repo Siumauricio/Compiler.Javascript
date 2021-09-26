@@ -7,22 +7,31 @@ namespace Compiler.Core.Statements
 {
     public class WhileStatement : Statement
     {
-        public WhileStatement(List<TypedExpression> expression, Statement statement)
+        public WhileStatement(List<TypedExpression> expression, Statement statement, List<Token> logics)
         {
             Expression = expression;
             Statement = statement;
+            Logics = logics;
         }
 
         public List<TypedExpression> Expression { get; }
         public Statement Statement { get; }
 
+        public List<Token> Logics { get; }
 
         public override string Generate(int tabs)
         {
             var code = GetCodeInit(tabs);
+            var index = 0;
             code += $"while(";
             foreach (var data in Expression){
                 code += $"{data.Generate()}";
+                if (Logics.Count != 0)
+                {
+                    code += $" {Logics[index].Lexeme} ";
+                    Logics.RemoveAt(index);
+                    index++;
+                }
             }
             code += ")";
             code += "{";

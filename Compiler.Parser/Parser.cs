@@ -308,6 +308,19 @@ namespace Compiler.Parser
                             return new ListStatement();
 
                         }
+                        var @operator = lookAhead;
+                        if (this.lookAhead.TokenType == TokenType.Increment)
+                        {
+                            Match(TokenType.Increment);
+                            Match(TokenType.SemiColon);
+                            return new IncrementStatement(variable, @operator);
+                        }
+                        else if (this.lookAhead.TokenType == TokenType.Decrement) {
+                            Match(TokenType.Decrement);
+                            Match(TokenType.SemiColon);
+                            return new DecrementStatement(variable, @operator);
+                        }
+
                         if (this.lookAhead.TokenType == TokenType.Assignation)
                         {
                             return AssignStmt(symbol.Id);
@@ -320,18 +333,21 @@ namespace Compiler.Parser
                         Match(TokenType.IfKeyword);
                         Match(TokenType.LeftParens);
                         List<TypedExpression> data = new List<TypedExpression>();
+                        List<Token> Logics = new List<Token>();
                         expression = Eq();
                         data.Add(expression as TypedExpression);
                         for (int i = 0; i < data.Count; i++)
                         {
                             if (lookAhead.TokenType == TokenType.AndOperator)
                             {
+                                Logics.Add(lookAhead);
                                 Match(TokenType.AndOperator);
                                 expression = Eq();
                                 data.Add(expression as TypedExpression);
                             }
                             else if (lookAhead.TokenType == TokenType.OrOperator)
                             {
+                                Logics.Add(lookAhead);
                                 Match(TokenType.OrOperator);
                                 expression = Eq();
                                 data.Add(expression as TypedExpression);
@@ -342,29 +358,33 @@ namespace Compiler.Parser
                         statement1 = Stmt();
                         if (this.lookAhead.TokenType != TokenType.ElseKeyword)
                         {
-                            return new IfStatement(data, statement1);
+                            return new IfStatement(data, statement1,Logics);
                         }
                         Match(TokenType.ElseKeyword);
                         statement2 = Stmt();
                         return new ElseStatement(data, statement1, statement2);
                     }
+
                 case TokenType.WhileKeyword:
                     {
                         Match(TokenType.WhileKeyword);
                         Match(TokenType.LeftParens);
                         List<TypedExpression> data = new List<TypedExpression>();
+                        List<Token> Logics = new List<Token>();
                         expression = Eq();
                         data.Add(expression as TypedExpression);
                         for (int i = 0; i < data.Count; i++)
                         {
                             if (lookAhead.TokenType == TokenType.AndOperator)
                             {
+                                Logics.Add(lookAhead);
                                 Match(TokenType.AndOperator);
                                 expression = Eq();
                                 data.Add(expression as TypedExpression);
                             }
                             else if (lookAhead.TokenType == TokenType.OrOperator)
                             {
+                                Logics.Add(lookAhead);
                                 Match(TokenType.OrOperator);
                                 expression = Eq();
                                 data.Add(expression as TypedExpression);
@@ -372,7 +392,7 @@ namespace Compiler.Parser
                         }
                         Match(TokenType.RightParens);
                         statement1 = Stmt();
-                        return new WhileStatement(data, statement1);
+                        return new WhileStatement(data, statement1,Logics);
                     }
                 case TokenType.ForeachKeyword:
                     {
@@ -644,6 +664,7 @@ namespace Compiler.Parser
                     token = lookAhead;
                     Match(TokenType.Identifier);
                     isInitialize = lookAhead;
+
                     if (isInitialize.TokenType == TokenType.Assignation)
                     {
                         id = new Id(token, Type.Int);
@@ -652,6 +673,7 @@ namespace Compiler.Parser
                         EnvironmentManager.AddVariableWithValue(token.Lexeme, id, assignation.Expression.Token.Lexeme);
                         break;
                     }
+
                     Match(TokenType.SemiColon);
                     id = new Id(token, Type.Int);
                     EnvironmentManager.AddVariable(token.Lexeme, id);

@@ -12,8 +12,6 @@ namespace Compiler.Core.Statements
             Token2 = token2;
             Statement = statement;
         }
-
-
   
         public TypedExpression Expression { get; }
         public Statement Statement { get; }
