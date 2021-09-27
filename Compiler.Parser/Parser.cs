@@ -14,17 +14,17 @@ namespace Compiler.Parser {
         private List<SymbolList> lst =new List<SymbolList>();
         private List<Token> lstBooleans = new List<Token>();
         private List<Token> lstIntFloats = new List<Token>();
-        string buffer = "";
-        string bff = "";
         List<Statement> functions = new List<Statement>();
         Tuple<Token, TokenType,Id> tuple;
         List<Expression> expressions = new List<Expression>();
         string paramsAssignment = "";
+        string buffer = "";
+        string clases = "";
+        string bff = "";
+        bool isMain = false;
         public Parser(IScanner scanner) {
-
             this.scanner = scanner;
             this.Move();
-
         }
 
         public Statement Parse() {
@@ -35,14 +35,17 @@ namespace Compiler.Parser {
 
             DeclsUsing();
             NamespaceStmt();
-            EnvironmentManager.PushContext();
+            
             //EnvironmentManager.AddMethod("print", new Id(new Token { Lexeme = "print", }, Type.Void), new ArgumentExpression(new Token { Lexeme = "" }, new Id(new Token { Lexeme = "arg1" }, Type.String)));
             
 
-            FunctionStmt();
+            //FunctionStmt();
 
             var block = Block();
-            Match(TokenType.CloseBrace);
+            Console.WriteLine(buffer);
+            buffer = buffer.Substring(0, buffer.Length - 3);
+
+            //Match(TokenType.CloseBrace);
 
             //block.ValidateSemantic();
             //code = code.Replace($"else:{Environment.NewLine}\tif", "elif");
@@ -54,6 +57,7 @@ namespace Compiler.Parser {
             if (this.lookAhead.TokenType == TokenType.UsingKeyword) {
                 switch (this.lookAhead.TokenType) {
                     case TokenType.UsingKeyword:
+
                         Match(TokenType.UsingKeyword);
                         Match(TokenType.Identifier);
                         Match(TokenType.SemiColon);
@@ -68,36 +72,64 @@ namespace Compiler.Parser {
                 Match(TokenType.NamespaceKeyword);
                 Match(TokenType.Identifier);
                 Match(TokenType.OpenBrace);
-                Match(TokenType.ClassKeyword);
-                Match(TokenType.Identifier);
-                Match(TokenType.OpenBrace);
+                ClassStmts();
+
             }
 
         }
+        public void ClassStmts() {
+            if (TokenType.ClassKeyword == this.lookAhead.TokenType) {
+                EnvironmentManager.PushContext();
+                Match(TokenType.ClassKeyword);
+                if (this.lookAhead.Lexeme !="MAIN") {
+                    isMain = true;
 
+                    clases = "class " + this.lookAhead.Lexeme + " {" + Environment.NewLine;
+                } else {
+
+                    clases = "";
+                }
+
+
+                Match(TokenType.Identifier);
+                buffer += clases;
+                Match(TokenType.OpenBrace);
+                FunctionStmt();
+                Block();
+                bff = "";
+                if (clases != "") {
+                buffer += "}" + Environment.NewLine;
+                }
+                isMain = false;
+                ClassStmts();
+            }
+          
+        }
+
+      
         private Statement Block() {
 
             if (this.lookAhead.TokenType == TokenType.OpenBrace) {
                 Match(TokenType.OpenBrace);
             }
             FunctionStmt();
-            Decls();//son las variables
-            var statements = Stmts();//statements como ifs, whiles,foreach,asignaciones
+            Decls();
+            var statements = Stmts();
             Match(TokenType.CloseBrace);
             bff += "}"+Environment.NewLine;
-
+            
             Decls();
             return statements;
         }
 
         private void FunctionStmt() {
-            if (this.lookAhead.TokenType == TokenType.PublicKeyword)//esto si es una funcion
+            if (this.lookAhead.TokenType == TokenType.PublicKeyword)
             {
                 Match(TokenType.PublicKeyword);
                 functions.Add(Function());
                 GenerateCodeFunction();
                 FunctionStmt();
-            } else if (this.lookAhead.TokenType == TokenType.StaticKeyword)//esto si es el Main
+            } else if (this.lookAhead.TokenType == TokenType.StaticKeyword)
             {
                 Match(TokenType.StaticKeyword);
                 functions.Add(MaintStmt());
@@ -119,7 +151,13 @@ namespace Compiler.Parser {
         }
         private void GenerateCodeFunction() {
             var function = EnvironmentManager.GetSymbol(tuple.Item1.Lexeme);
-            buffer += "function " + tuple.Item1.Lexeme + "(";
+            if (isMain) {
+                buffer +=  tuple.Item1.Lexeme + "(";
+
+            } else {
+                buffer += "function " + tuple.Item1.Lexeme + "(";
+
+            }
             if (function.Parameters.Count == 0) {
                 buffer += ") {"+Environment.NewLine;
             }
@@ -137,7 +175,7 @@ namespace Compiler.Parser {
         private void GenerateCodeFunctionMain() {
             buffer += bff;
             buffer = buffer.Substring(0, buffer.Length-3);
-            Console.WriteLine(buffer);
+            //Console.WriteLine(buffer);
         }
         private Statement Function() {
             if (this.lookAhead.TokenType == TokenType.VoidKeyword || this.lookAhead.TokenType == TokenType.IntKeyword || this.lookAhead.TokenType == TokenType.BoolKeyword ||   this.lookAhead.TokenType == TokenType.FloatKeyword ||this.lookAhead.TokenType == TokenType.DateTimeKeyword) {
@@ -583,8 +621,10 @@ namespace Compiler.Parser {
                     return null;
                 default:
                     return Block();
-            }
 
+
+            }
+            bff = "";
         }
 
         private void verifyType(Token token) {

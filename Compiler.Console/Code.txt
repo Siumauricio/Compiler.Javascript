@@ -2,27 +2,49 @@ using System;
 using Compiler.Core;
 namespace std.s
 {
-    class TestClass
+
+class Prueba {
+      public bool f3(int x,int x2){
+        return x > x2 ;
+      }
+      public bool f4(int x3,int x4){
+        return x3 > x4 ;
+      }
+      
+}
+
+class Prueba2 {
+public bool f4(int x,int x2){
+        return x > x2 ;
+      }
+}
+
+    class MAIN
     {
       public bool f2(int x,int x2){
 
         return x > x2 ;
       }
 
-      public bool f3(int x1,int x4){
-        return x1 > x4 ;
+      public int f3(int x1,int x4){
+        return x1 + x4 ;
       }
         
       static void main(string[] args)
 
         {
-         bool x90=f2(1,2) ;
-         if(x90 == 6){
+        int k;
+         bool x90 = f2(k,3) ;
+         if(x90 == true){
          Console.WriteLine(25+x90);
          }
          int x3=25+25+25+25+25;
          Console.WriteLine(x3);
-
+         Console.WriteLine(x3);
+         Console.WriteLine(x3);
+         Console.WriteLine(x3);
+         Console.WriteLine(x3);
         }
+
     }
 }

@@ -29,8 +29,10 @@ namespace Compiler.Console
         }
 
 
+
+        }
+
     }
-}
 
 //    while (true) {
 //        var token = scanner.GetNextToken();
