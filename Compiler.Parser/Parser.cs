@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using Type = Compiler.Core.Type;
 using System.Linq;
+using System.IO;
+
 namespace Compiler.Parser {
     public class Parser : IParser {
         private readonly IScanner scanner;
@@ -20,7 +22,7 @@ namespace Compiler.Parser {
         List<Symbol> _functions = new List<Symbol>();
         Dictionary<string,List<Symbol>> classes = new Dictionary<string, List<Symbol>>();
         string paramsAssignment = "";
-        string buffer = "";
+        public string buffer = "";
         string clases = "";
         string bff = "";
         bool isMain = false;
@@ -29,6 +31,7 @@ namespace Compiler.Parser {
         public Parser(IScanner scanner) {
             this.scanner = scanner;
             this.Move();
+         
         }
 
         public Statement Parse() {

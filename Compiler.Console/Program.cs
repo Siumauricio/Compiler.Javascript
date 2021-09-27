@@ -22,10 +22,12 @@ namespace Compiler.Console
             //}
             var parser = new Parser.Parser(scanner);
             var ast = parser.Parse();
+            var buffer = parser.buffer;
+            File.WriteAllText("C:\\Users\\enrik\\Documents\\GitHub\\Compiler.Javascript\\output.js", buffer);
             // var engine = new CompilerEngine(parser);
             // engine.Run();
 
-           
+
         }
 
 
