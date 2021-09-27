@@ -1088,7 +1088,7 @@ namespace Compiler.Parser {
                         assignation.ValidateSemantic();
 
                         if (paramsAssignment == "") {
-                            bff += "const "+assignation.Id.Token.Lexeme+"= " +"Date.now();" + Environment.NewLine;
+                            bff += "const "+assignation.Id.Token.Lexeme+"= " + "new Date().toLocaleDateString();" + Environment.NewLine;
                         } else {
                             bff += "let " + token.Lexeme + " = " + paramsAssignment + Environment.NewLine;
 

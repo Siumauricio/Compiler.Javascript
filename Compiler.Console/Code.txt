@@ -74,6 +74,8 @@ class Prueba2 {
          }
          int x3=25+25+25+25+25;
          DateTime s = DateTime.Now;
+                  Console.WriteLine(s);
+
          bool resultados;
          resultados= bool.Parse(Console.ReadLine());
          Console.WriteLine(resultados);
