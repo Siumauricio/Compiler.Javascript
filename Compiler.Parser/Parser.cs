@@ -366,6 +366,8 @@ namespace Compiler.Parser {
                             }
                             bff += ");" + Environment.NewLine;
                             expressions.Clear();
+                            Match(TokenType.SemiColon);
+
                             Decls();
                             return Assign;
                         } else {

@@ -33,8 +33,10 @@ public bool f4(int x,int x2){
       static void main(string[] args)
 
         {
-        int k;
-         bool x90 = f2(k,3) ;
+        int k=25;
+        f2(k,3);
+         bool x90 = f2(25,3) ;
+         
          if(x90 == true){
          Console.WriteLine(25+x90);
          }
