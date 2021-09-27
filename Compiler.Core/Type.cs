@@ -24,6 +24,7 @@ namespace Compiler.Core
         public static Type DateTime => new Type("datetime", TokenType.BasicType);
         public static Type List => new Type("List", TokenType.BasicType);
         public static Type Class => new Type("Class", TokenType.BasicType);
+        public static Type ReadLine => new Type("ConsoleReadLine", TokenType.ReadLineKeyword);
         public bool Equals(Type other)
         {
             if (ReferenceEquals(null, other)) return false;

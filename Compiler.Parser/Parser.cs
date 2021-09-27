@@ -382,7 +382,36 @@ namespace Compiler.Parser {
                         } else {
                             if (this.lookAhead.TokenType == TokenType.Assignation) {
                                 var Assign = AssignStmt(symbol.Id);
-                                bff += Assign.Generate();
+                                if (Assign is AssignationStatement) {
+                                    var Read = Assign as AssignationStatement;
+                                    if (Read.Expression.GetExpressionType() == Type.ReadLine) {
+                                        var Result = Read.Expression.Generate();
+                                        if (Result == "Number") {
+                                            if (Read.Id.GetExpressionType() != Type.Int) {
+                                                throw new ApplicationException($"Syntax error! Invalid Parse and ReadLine");
+
+                                            }
+                                        }
+                                        if (Result == "Number") {
+                                            if (Read.Id.GetExpressionType() != Type.Float) {
+                                                throw new ApplicationException($"Syntax error! Invalid Parse and ReadLine");
+
+                                            }
+                                        }
+                                        if (Result == "Boolean") {
+                                            if (Read.Id.GetExpressionType() != Type.Bool) {
+                                                throw new ApplicationException($"Syntax error! Invalid Parse and ReadLine");
+                                            }
+                                        }
+                                        bff += Read.Id.Token.Lexeme +" = "+ Result + "(prompt(''));"+Environment.NewLine;
+
+                                    } else {
+                                        bff += Assign.Generate();
+                                    }
+                                } else {
+                                    bff += Assign.Generate();
+
+                                }
                                 Decls();
                                 return Assign;
                             }
@@ -484,7 +513,6 @@ namespace Compiler.Parser {
                                 Match(TokenType.IntConstant);
                             }
                         }
-                        ///////////////
 
                         for (int i = 0; i < data.Count; i++)
                         {
@@ -779,8 +807,8 @@ namespace Compiler.Parser {
                     Match(TokenType.DateTimeConstant);
                     return constant;
                 case TokenType.IntParseKeyword:
+                    constant = new Constant(new Token { Lexeme = "Number" }, Type.ReadLine);
                     Match(TokenType.IntParseKeyword);
-                    constant = new Constant(lookAhead, Type.Int);
                     Match(TokenType.LeftParens);
                     Match(TokenType.ReadLineKeyword);
                     Match(TokenType.LeftParens);
@@ -788,8 +816,8 @@ namespace Compiler.Parser {
                     Match(TokenType.RightParens);
                     return constant;
                 case TokenType.FloatParseKeyword:
+                    constant = new Constant(new Token { Lexeme = "Number" }, Type.ReadLine);
                     Match(TokenType.FloatParseKeyword);
-                    constant = new Constant(lookAhead, Type.Float);
                     Match(TokenType.LeftParens);
                     Match(TokenType.ReadLineKeyword);
                     Match(TokenType.LeftParens);
@@ -797,8 +825,8 @@ namespace Compiler.Parser {
                     Match(TokenType.RightParens);
                     return constant;
                 case TokenType.BoolParseKeyword:
+                    constant = new Constant(new Token { Lexeme = "Boolean" }, Type.ReadLine);
                     Match(TokenType.BoolParseKeyword);
-                    constant = new Constant(lookAhead, Type.Bool);
                     Match(TokenType.LeftParens);
                     Match(TokenType.ReadLineKeyword);
                     Match(TokenType.LeftParens);
@@ -900,9 +928,7 @@ namespace Compiler.Parser {
 
                         if (isSum.TokenType == TokenType.Plus) {
                             paramsAssignment += "+";
-                        } else {
-                            paramsAssignment += ";";
-                        }
+                        } 
                         expressions.Clear();
 
                         return Assign.Id;
@@ -1054,7 +1080,7 @@ namespace Compiler.Parser {
                     Match(TokenType.DateTimeKeyword);
                     token = lookAhead;
                     Match(TokenType.Identifier);
-                    isInitialize = lookAhead;
+                    isInitialize = lookAhead; 
                     if (isInitialize.TokenType == TokenType.Assignation) {
                         id = new Id(token, Type.DateTime);
                         var assignation = AssignStmt(id) as AssignationStatement;
@@ -1062,7 +1088,7 @@ namespace Compiler.Parser {
                         assignation.ValidateSemantic();
 
                         if (paramsAssignment == "") {
-                            bff += "let " + assignation.Generate() + Environment.NewLine;
+                            bff += "const "+assignation.Id.Token.Lexeme+"= " +"Date.now();" + Environment.NewLine;
                         } else {
                             bff += "let " + token.Lexeme + " = " + paramsAssignment + Environment.NewLine;
 
