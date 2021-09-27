@@ -331,13 +331,16 @@ namespace Compiler.Parser {
                         if (this.lookAhead.TokenType == TokenType.Increment) {
                             Match(TokenType.Increment);
                             Match(TokenType.SemiColon);
+                            bff += variable.Lexeme + "++;" + Environment.NewLine;
+                            Decls();
                             return new IncrementStatement(variable, @operator);
                         } else if (this.lookAhead.TokenType == TokenType.Decrement) {
                             Match(TokenType.Decrement);
                             Match(TokenType.SemiColon);
+                            bff += variable.Lexeme + "--;" + Environment.NewLine;
+                            Decls();
                             return new DecrementStatement(variable, @operator);
                         }
-
                         //if (this.lookAhead.TokenType == TokenType.Assignation) {
                         //    return AssignStmt(symbol.Id);
                         //}
@@ -401,7 +404,6 @@ namespace Compiler.Parser {
                             bff += "if(" + result.LeftExpression.Token.Lexeme + " " + result.Token.Lexeme + " " + result.RightExpression.Token.Lexeme;
                         }
                         data.Add(expression as TypedExpression);
-                        //////////////
                         if (lookAhead.TokenType == TokenType.Percentaje) {
                             Match(TokenType.Percentaje);
                             if (lookAhead.TokenType == TokenType.Identifier)
@@ -418,7 +420,6 @@ namespace Compiler.Parser {
                                 Match(TokenType.IntConstant);
                             }
                         }
-                        ///////////////
                         for (int i = 0; i < data.Count; i++) {
                             if (lookAhead.TokenType == TokenType.AndOperator) {
                                 bff += " && ";
@@ -607,6 +608,12 @@ namespace Compiler.Parser {
                         bff += ";"+Environment.NewLine;
 
                         
+                    }else if(expression is Constant) {
+                        if (expression.type == tuple.Item3.type) {
+                            bff += expression.Generate() + ";" + Environment.NewLine;
+                        } else {
+                            throw new ApplicationException($"Syntax error! expected return type {tuple.Item3.type} but found {expression.type}.");
+                        }
                     }
                     else if(expression!=null ) {
                         if (expression.GetType() == typeof(Id)) {
@@ -741,8 +748,15 @@ namespace Compiler.Parser {
                         return expression;
                     }
                 case TokenType.IntConstant:
+                   
                     var constant = new Constant(lookAhead, Type.Int);
+                    if (isSumFunction) {
+                        paramsAssignment += constant.Generate();
+                    }
                     Match(TokenType.IntConstant);
+                    if (TokenType.Plus == this.lookAhead.TokenType && isSumFunction) {
+                        paramsAssignment += " + ";
+                    }
                     return constant;
                 case TokenType.FloatConstant:
                     constant = new Constant(lookAhead, Type.Float);
@@ -788,7 +802,8 @@ namespace Compiler.Parser {
 
                                 if ((Assign.Params[i].Id.GetExpressionType() != Assign.Attributes[i].type) && tipo?.GetType() != null) {
                                     throw new ApplicationException($"Syntax error! Param Type Expected {Assign.Params[i].Id.GetExpressionType()} but Found {Assign.Attributes[i].type}");
-                                } else if (Assign.Attributes[i] is ArithmeticOperator) {
+                                } 
+                                else if (Assign.Attributes[i] is ArithmeticOperator) {
                                     var convert = Assign.Attributes[i] as ArithmeticOperator;
                                     var type = convert.GetExpressionType();
                                     if (type == Assign.Params[i].Id.GetExpressionType()) {
@@ -808,9 +823,11 @@ namespace Compiler.Parser {
 
                             if (isSum.TokenType == TokenType.Plus) {
                                 paramsAssignment += "+";
-                            } else {
-                                paramsAssignment += ";";
-                            }
+                                isSumFunction = true;
+                            } 
+                            expressions.Clear();
+
+                            return Assign.Id;
                         }
                         expressions.Clear();
                     }
@@ -870,6 +887,7 @@ namespace Compiler.Parser {
 
             return new Id(null, Type.Void);
         }
+        bool isSumFunction = false;
         private Statement GetFunctionStmt(Symbol symbol) {
             Match(TokenType.LeftParens);
             var @params = OptParams2();
@@ -884,6 +902,9 @@ namespace Compiler.Parser {
         }
 
         private Expression Params2() {
+            if (isSumFunction) {
+                isSumFunction = false;
+            }
             var expression = Eq();
             expressions.Add(expression);
             if (this.lookAhead.TokenType != TokenType.Comma) {
@@ -956,7 +977,7 @@ namespace Compiler.Parser {
                         if (paramsAssignment == "") {
                             bff += "let " + assignation.Generate() + Environment.NewLine;
                         } else {
-                            bff += "let " + token.Lexeme + " = " + paramsAssignment + Environment.NewLine;
+                            bff += "let " + token.Lexeme + " = " + paramsAssignment + ";"+ Environment.NewLine;
 
                         }
                         EnvironmentManager.AddVariableWithValue(token.Lexeme, id, assignation.Expression.Token.Lexeme);
@@ -990,8 +1011,7 @@ namespace Compiler.Parser {
                         if (paramsAssignment == "") {
                             bff += "let " + assignation.Generate() + Environment.NewLine;
                         } else {
-                            bff += "let " + token.Lexeme + " = " + paramsAssignment + Environment.NewLine;
-
+                                bff += "let " + token.Lexeme + " = " + paramsAssignment +";"+ Environment.NewLine;
                         }
 
                         EnvironmentManager.AddVariableWithValue(token.Lexeme, id, assignation.Expression.Token.Lexeme);
@@ -1110,6 +1130,7 @@ namespace Compiler.Parser {
                     break;
             }
             paramsAssignment = "";
+            isSumFunction = false;
         }
 
 
