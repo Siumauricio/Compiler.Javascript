@@ -5,12 +5,30 @@ namespace std.s
 
 class Prueba {
       public bool f3(int x,int x2){
-        return x > x2 ;
+      int value=10;
+      int value2=20;
+      bool value3=false;
+      List<bool> list=new List<bool>();
+      List<int> list2=new List<int>();
+      if(value==value2){
+        Console.WriteLine(value);
+        list.Add(false);
+        list2.Add(10);
       }
-      public int f4(int x3,int x4){
-        return x3+x3+25;
-      }
+      list.Add(true);
 
+      foreach(bool datos in list){
+        list.Add(false);
+        Console.WriteLine(datos);
+      Console.WriteLine(datos);
+      }
+        return x > x2 ;
+       
+      }
+      public float f4(int x3,int x4){
+        return x3 + x3 +x3;
+      }
+      
 }
 
 class Prueba2 {
@@ -26,19 +44,37 @@ class Prueba2 {
         return x > x2 ;
       }
 
+      public int f6(){
+      int val;
+        return val;
+      }
+
       public int f3(int x1,int x4){
         return x1 + x4 ;
       }
-
+        
       static void main(string[] args)
 
         {
          Prueba u = new Prueba();
          Prueba2 u2=new Prueba2();
-         int value= f3(20,20) + 25 ;
-         value++;
-        value=25+25+25;
+      
+         int result=30;
+         result++;
+         bool value=u.f3(20,20);
+         float k=u.f4(5,5);
+         f6();
+         Console.WriteLine(k); 
+         f2(3,3);
+         bool x90 = f2(25,3) ;
+         f2(5,3);
+         if(x90 == true){
+            
+         Console.WriteLine(25+x90);
+         }
          int x3=25+25+25+25+25;
+         int resultados;
+         resultados= float.Parse(Console.ReadLine());
          Console.WriteLine(x3);
          Console.WriteLine(x3);
          Console.WriteLine(x3);

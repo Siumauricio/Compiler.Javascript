@@ -778,6 +778,33 @@ namespace Compiler.Parser {
                     constant = new Constant(lookAhead, Type.DateTime);
                     Match(TokenType.DateTimeConstant);
                     return constant;
+                case TokenType.IntParseKeyword:
+                    Match(TokenType.IntParseKeyword);
+                    constant = new Constant(lookAhead, Type.Int);
+                    Match(TokenType.LeftParens);
+                    Match(TokenType.ReadLineKeyword);
+                    Match(TokenType.LeftParens);
+                    Match(TokenType.RightParens);
+                    Match(TokenType.RightParens);
+                    return constant;
+                case TokenType.FloatParseKeyword:
+                    Match(TokenType.FloatParseKeyword);
+                    constant = new Constant(lookAhead, Type.Float);
+                    Match(TokenType.LeftParens);
+                    Match(TokenType.ReadLineKeyword);
+                    Match(TokenType.LeftParens);
+                    Match(TokenType.RightParens);
+                    Match(TokenType.RightParens);
+                    return constant;
+                case TokenType.BoolParseKeyword:
+                    Match(TokenType.BoolParseKeyword);
+                    constant = new Constant(lookAhead, Type.Bool);
+                    Match(TokenType.LeftParens);
+                    Match(TokenType.ReadLineKeyword);
+                    Match(TokenType.LeftParens);
+                    Match(TokenType.RightParens);
+                    Match(TokenType.RightParens);
+                    return constant;
                 default:
                     Symbol symbol = null;
                     if (lookAhead.Lexeme.Contains(".")) {
@@ -940,6 +967,7 @@ namespace Compiler.Parser {
         }
         private Statement AssignStmt(Id id) {
             Match(TokenType.Assignation);
+            
             var expression = Eq();
             Match(TokenType.SemiColon);
             return new AssignationStatement(id, expression as TypedExpression);
