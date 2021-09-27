@@ -8,7 +8,8 @@ namespace Compiler.Core
     {
         Variable,
         Method,
-        Library
+        Library,
+        Class
     }
 
     public class Symbol {

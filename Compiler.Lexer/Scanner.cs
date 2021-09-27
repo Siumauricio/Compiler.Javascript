@@ -40,7 +40,7 @@ namespace Compiler.Lexer {
                 {"List", TokenType.ListKeyword},
                 {"new", TokenType.NewKeyword },
                 {".add", TokenType.AddKeyword },
-
+                { "DateTime.Now", TokenType.DateTimeConstant},
                 {"return", TokenType.ReturnKeyword },
             };
 
@@ -73,7 +73,8 @@ namespace Compiler.Lexer {
                 { "++", TokenType.Increment },
                 { "--", TokenType.Decrement },
                { "[", TokenType.LeftBracket },
-               { "]", TokenType.RightBracket }
+               { "]", TokenType.RightBracket },
+                {".",TokenType.Dot }
 
             };
             this.Rep = new Dictionary<string, TokenType>

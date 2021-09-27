@@ -7,15 +7,15 @@ class Prueba {
       public bool f3(int x,int x2){
         return x > x2 ;
       }
-      public bool f4(int x3,int x4){
-        return x3 > x4 ;
+      public float f4(int x3,int x4){
+        return x3 + x3 +x3;
       }
       
 }
 
 class Prueba2 {
-public bool f4(int x,int x2){
-        return x > x2 ;
+ public bool f4(int x3,int x4){
+        return x3 > x4 ;
       }
 }
 
@@ -33,10 +33,12 @@ public bool f4(int x,int x2){
       static void main(string[] args)
 
         {
-        int k=25;
-        f2(k,3);
+         Prueba u = new Prueba();
+         float k=u.f4(5,5);
+         Console.WriteLine(k);
+         f2(3,3);
          bool x90 = f2(25,3) ;
-         
+         f2(5,3);
          if(x90 == true){
          Console.WriteLine(25+x90);
          }

@@ -17,11 +17,15 @@ namespace Compiler.Parser {
         List<Statement> functions = new List<Statement>();
         Tuple<Token, TokenType,Id> tuple;
         List<Expression> expressions = new List<Expression>();
+        List<Symbol> _functions = new List<Symbol>();
+        Dictionary<string,List<Symbol>> classes = new Dictionary<string, List<Symbol>>();
         string paramsAssignment = "";
         string buffer = "";
         string clases = "";
         string bff = "";
         bool isMain = false;
+        string actualClass = "";
+
         public Parser(IScanner scanner) {
             this.scanner = scanner;
             this.Move();
@@ -35,21 +39,11 @@ namespace Compiler.Parser {
 
             DeclsUsing();
             NamespaceStmt();
-            
-            //EnvironmentManager.AddMethod("print", new Id(new Token { Lexeme = "print", }, Type.Void), new ArgumentExpression(new Token { Lexeme = "" }, new Id(new Token { Lexeme = "arg1" }, Type.String)));
-            
-
             //FunctionStmt();
-
             var block = Block();
             Console.WriteLine(buffer);
-            buffer = buffer.Substring(0, buffer.Length - 3);
-
+            //buffer = buffer.Substring(0, buffer.Length - 3);
             //Match(TokenType.CloseBrace);
-
-            //block.ValidateSemantic();
-            //code = code.Replace($"else:{Environment.NewLine}\tif", "elif");
-            //var code = block.Generate();
             return block;
         }
 
@@ -57,7 +51,6 @@ namespace Compiler.Parser {
             if (this.lookAhead.TokenType == TokenType.UsingKeyword) {
                 switch (this.lookAhead.TokenType) {
                     case TokenType.UsingKeyword:
-
                         Match(TokenType.UsingKeyword);
                         Match(TokenType.Identifier);
                         Match(TokenType.SemiColon);
@@ -82,11 +75,11 @@ namespace Compiler.Parser {
                 EnvironmentManager.PushContext();
                 Match(TokenType.ClassKeyword);
                 if (this.lookAhead.Lexeme !="MAIN") {
+                    actualClass = this.lookAhead.Lexeme;
                     isMain = true;
-
                     clases = "class " + this.lookAhead.Lexeme + " {" + Environment.NewLine;
                 } else {
-
+                    
                     clases = "";
                 }
 
@@ -96,10 +89,16 @@ namespace Compiler.Parser {
                 Match(TokenType.OpenBrace);
                 FunctionStmt();
                 Block();
+                if (isMain) {
+                    classes.Add(actualClass, _functions);
+                }
+                 _functions = new List<Symbol>();
+
                 bff = "";
                 if (clases != "") {
                 buffer += "}" + Environment.NewLine;
                 }
+                actualClass = "";
                 isMain = false;
                 ClassStmts();
             }
@@ -195,10 +194,17 @@ namespace Compiler.Parser {
 
                 } else if (tokenType == TokenType.BoolKeyword) {
                     id = new Id(token, Type.Bool);
+                } else if (tokenType == TokenType.VoidKeyword) {
+                    id = new Id(token, Type.Void);
                 }
                 List<FunctionParamsStatement> symbols = new List<FunctionParamsStatement>();
                 ParamsFunction(symbols);
                 tuple = new Tuple<Token, TokenType,Id>(token, tokenType,id);
+                Symbol symbol = new Symbol(SymbolType.Method, id, symbols);
+                _functions.Add(symbol);
+
+
+
                 EnvironmentManager.AddMethod2(token.Lexeme, id, symbols) ;
                 Match(TokenType.RightParens);
             }
@@ -533,7 +539,6 @@ namespace Compiler.Parser {
                 case TokenType.WriteLineKeyword:
                     Match(TokenType.WriteLineKeyword);
                     bff += "console.log(";
-
                     Match(TokenType.LeftParens);
                     var isIdentifier = lookAhead;
                     var dataVariable = new List<Symbol>();
@@ -760,16 +765,71 @@ namespace Compiler.Parser {
                     Match(TokenType.DateTimeConstant);
                     return constant;
                 default:
-                    var symbol = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
-                    Match(TokenType.Identifier);
+                    Symbol symbol = null;
+                    if (lookAhead.Lexeme.Contains(".")) {
+                        int pos = lookAhead.Lexeme.IndexOf('.')+1;
+                        string function = lookAhead.Lexeme.Substring(pos);
+                        int posVar = pos - 1;
+                         string clase = lookAhead.Lexeme.Substring(0, posVar);
+                        Match(TokenType.Identifier);
+                        return getParameters(clase, function);
+                    } else {
+                        symbol = EnvironmentManager.GetSymbol(this.lookAhead.Lexeme);
+                        Match(TokenType.Identifier);
 
-                    if (symbol.SymbolType == SymbolType.Method) {
-                        var Assign = GetFunctionStmt(symbol) as ParamsValueFunction;
+                        if (symbol.SymbolType == SymbolType.Method) {
+                            var Assign = GetFunctionStmt(symbol) as ParamsValueFunction;
+                            paramsAssignment += Assign.Id.Token.Lexeme + " (";
+                            if (Assign.Params.Count != Assign.Attributes.Count) {
+                                throw new ApplicationException($"Syntax error! Function {Assign.Id.Token.Lexeme} Accept {Assign.Params.Count} parameters and you send {Assign.Attributes.Count} parameters");
+                            }
+                            for (int i = 0; i < Assign.Params.Count; i++) {
+                                Type tipo = Assign.Attributes[i].type;
 
-                        paramsAssignment += Assign.Id.Token.Lexeme + " (";
+                                if ((Assign.Params[i].Id.GetExpressionType() != Assign.Attributes[i].type) && tipo?.GetType() != null) {
+                                    throw new ApplicationException($"Syntax error! Param Type Expected {Assign.Params[i].Id.GetExpressionType()} but Found {Assign.Attributes[i].type}");
+                                } else if (Assign.Attributes[i] is ArithmeticOperator) {
+                                    var convert = Assign.Attributes[i] as ArithmeticOperator;
+                                    var type = convert.GetExpressionType();
+                                    if (type == Assign.Params[i].Id.GetExpressionType()) {
+                                        paramsAssignment += convert.Generate();
+                                    } else {
+                                        throw new ApplicationException($"Syntax error! Param Type Expected {Assign.Params[i].Id.GetExpressionType()} but Found {type}");
+                                    }
+                                } else {
+                                    paramsAssignment += Assign.Attributes[i].Token.Lexeme;
+                                }
+                                if ((i + 1) != Assign.Params.Count) {
+                                    paramsAssignment += ",";
+                                }
+                            }
+                            paramsAssignment += ")";
+                            var isSum = this.lookAhead;
+
+                            if (isSum.TokenType == TokenType.Plus) {
+                                paramsAssignment += "+";
+                            } else {
+                                paramsAssignment += ";";
+                            }
+                        }
+                        expressions.Clear();
+                    }
+                    return symbol.Id;
+            }
+        }
+        private Expression getParameters(string clase,string function) {
+            var symbol = EnvironmentManager.GetSymbol(clase);
+            //for (int i = 0; i < symbol.; i++) {
+
+            //}
+            for (int j = 0; j < symbol.Value.Count; j++) {
+                if (symbol.Value[j].Id.Token.Lexeme == function) {
+                    if (symbol.Value[j].SymbolType == SymbolType.Method) {
+                        var AssSymbol = symbol.Value[j] as Symbol;
+                        var Assign = GetFunctionStmt(AssSymbol) as ParamsValueFunction;
+                        paramsAssignment += clase+"."+Assign.Id.Token.Lexeme + " (";
                         if (Assign.Params.Count != Assign.Attributes.Count) {
                             throw new ApplicationException($"Syntax error! Function {Assign.Id.Token.Lexeme} Accept {Assign.Params.Count} parameters and you send {Assign.Attributes.Count} parameters");
-
                         }
                         for (int i = 0; i < Assign.Params.Count; i++) {
                             Type tipo = Assign.Attributes[i].type;
@@ -790,7 +850,6 @@ namespace Compiler.Parser {
                             if ((i + 1) != Assign.Params.Count) {
                                 paramsAssignment += ",";
                             }
-
                         }
                         paramsAssignment += ")";
                         var isSum = this.lookAhead;
@@ -800,12 +859,17 @@ namespace Compiler.Parser {
                         } else {
                             paramsAssignment += ";";
                         }
-                    }
-                    expressions.Clear();
-                    return symbol.Id;
-            }
-        }
+                        expressions.Clear();
 
+                        return Assign.Id;
+                    }
+                    break;
+                }
+            }
+            expressions.Clear();
+
+            return new Id(null, Type.Void);
+        }
         private Statement GetFunctionStmt(Symbol symbol) {
             Match(TokenType.LeftParens);
             var @params = OptParams2();
@@ -861,12 +925,14 @@ namespace Compiler.Parser {
         }
       
         private void Decls() {
+           var isClass =  classes.TryGetValue(this.lookAhead.Lexeme, out var found);
             if (this.lookAhead.TokenType == TokenType.IntKeyword ||
                 this.lookAhead.TokenType == TokenType.FloatKeyword ||
                 this.lookAhead.TokenType == TokenType.StringKeyword ||
                 this.lookAhead.TokenType == TokenType.BoolKeyword ||
                 this.lookAhead.TokenType == TokenType.DateTimeKeyword||
-                this.lookAhead.TokenType==TokenType.ListKeyword)
+                this.lookAhead.TokenType==TokenType.ListKeyword ||
+                isClass)
             {
                 Decl();
                 Decls();
@@ -882,7 +948,6 @@ namespace Compiler.Parser {
                     this.lstIntFloats.Add(token);
                     Match(TokenType.Identifier);
                     var isInitialize = lookAhead;
-
                     if (isInitialize.TokenType == TokenType.Assignation) {
                         id = new Id(token, Type.Float);
                         var assignation = AssignStmt(id) as AssignationStatement;
@@ -1011,8 +1076,37 @@ namespace Compiler.Parser {
                     }
 
                     break;
+                case TokenType.Identifier:
 
+
+                    if (classes.TryGetValue(this.lookAhead.Lexeme, out var found)) {
+                        var Token = this.lookAhead;
+                        string clase = this.lookAhead.Lexeme;
+                        Match(TokenType.Identifier);
+                        string variable = this.lookAhead.Lexeme;
+                        bff += "let " + this.lookAhead.Lexeme + "  ";
+                        Match(TokenType.Identifier);
+                        if (lookAhead.TokenType != TokenType.Assignation) {
+                            throw new ApplicationException($"Syntax error! You Must be Initialized the Variable Type Object");
+
+                        }
+                        Match(TokenType.Assignation);
+                        Match(TokenType.NewKeyword);
+                        if (Token.Lexeme != lookAhead.Lexeme) {
+                            throw new ApplicationException($"Syntax error! Identifier Left Not Equal To Right Identifier!");
+                        }
+                        Match(TokenType.Identifier);
+                        Match(TokenType.LeftParens);
+                        Match(TokenType.RightParens);
+                        Match(TokenType.SemiColon);
+                        id = new Id(Token, Type.Class);
+                        bff += " = new " + clase + "();" + Environment.NewLine;
+
+                        EnvironmentManager.AddVariableWithValue(variable, id, found);
+                    } 
+                    break;
                 default:
+
                     break;
             }
             paramsAssignment = "";
