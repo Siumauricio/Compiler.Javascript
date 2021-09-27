@@ -67,7 +67,10 @@ namespace Compiler.Core
         NewKeyword,
         AddKeyword,
         ReturnKeyword,
-        Dot
+        Dot,
+        IntParseKeyword,
+        FloatParseKeyword,
+        BoolParseKeyword
 
     }
 }

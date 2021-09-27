@@ -42,6 +42,9 @@ namespace Compiler.Lexer {
                 {".add", TokenType.AddKeyword },
                 { "DateTime.Now", TokenType.DateTimeConstant},
                 {"return", TokenType.ReturnKeyword },
+                {"Int32.Parse",TokenType.IntParseKeyword },
+                {"float.Parse",TokenType.FloatParseKeyword },
+                {"bool.Parse",TokenType.BoolParseKeyword }
             };
 
             this.Tokens = new Dictionary<string, TokenType>
