@@ -44,7 +44,6 @@ namespace Compiler.Parser {
             NamespaceStmt();
             //FunctionStmt();
             var block = Block();
-            Console.WriteLine(buffer);
             //buffer = buffer.Substring(0, buffer.Length - 3);
             //Match(TokenType.CloseBrace);
             return block;
